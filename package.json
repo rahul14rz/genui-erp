@@ -12,6 +12,8 @@
     "db:setup": "pnpm --filter @genui-erp/db run setup",
     "start": "pnpm --filter @genui-erp/server run start",
     "dev": "pnpm --filter @genui-erp/server run dev",
-    "generate": "pnpm --filter @genui-erp/catalog-schema run generate"
+    "generate": "pnpm --filter @genui-erp/catalog-schema run generate",
+    "evals": "pnpm --filter @genui-erp/evals run evals",
+    "evals:report": "pnpm --filter @genui-erp/evals run report"
   }
 }

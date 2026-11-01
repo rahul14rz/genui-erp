@@ -243,7 +243,7 @@ function plan(q: string, today: string): Plan | null {
       }),
     };
   }
-  if (/approv|pending request|credit override|discount request/.test(s)) {
+  if (/approv|pending request|credit override|credit request|discount request/.test(s)) {
     return {
       tool: "listApprovals",
       args: { status: ["pending"] },

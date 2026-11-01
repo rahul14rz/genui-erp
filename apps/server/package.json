@@ -21,5 +21,9 @@
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vitest": "5.0.5"
+  },
+  "exports": {
+    "./catalog": "./src/agent/catalog.ts",
+    "./generated/catalog": "./src/generated/catalog.ts"
   }
 }

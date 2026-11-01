@@ -197,11 +197,9 @@ export class Agent {
 
     stats.fallback = true;
     await this.logFailure({ role: s.scope.role, question, raw, errors, model: this.deps.model.name });
-    const say = (extractJson(raw.at(-1) ?? null) as { say?: unknown } | null)?.say;
-    const text =
-      typeof say === "string" && say.trim()
-        ? say
-        : "I could not lay that answer out as a table or chart. Try asking for one specific list, such as open orders this week.";
+    // The model's own text is not shown here: an answer that failed
+    // validation is untrusted, and its "say" could repeat injected claims.
+    const text = "I could not lay that answer out as a table or chart. Try asking for one specific list, such as open orders this week.";
     emit.text(text);
     this.remember(s, question, text);
     return stats;
