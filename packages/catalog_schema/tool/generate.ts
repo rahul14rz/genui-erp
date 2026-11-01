@@ -1,6 +1,9 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { dartModels } from "./dart.ts";
+import { BINDING, loadCatalog, modelSchema, stripAnnotations, type Catalog, type JsonSchema } from "./schema.ts";
+import { zodOf } from "./zod.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const SCHEMA_DIR = join(ROOT, "packages", "catalog_schema");
@@ -39,11 +42,77 @@ export const PERMISSION_DESCRIPTIONS: Record<Permission, string> = ${JSON.string
 `;
 }
 
+function sortedDefs(defs: Record<string, JsonSchema>): string[] {
+  const refs = (s: unknown): string[] =>
+    s && typeof s === "object"
+      ? Object.entries(s).flatMap(([k, v]) => (k === "$ref" && typeof v === "string" ? [v.replace("#/$defs/", "")] : refs(v)))
+      : [];
+  const out: string[] = [];
+  const visit = (name: string) => {
+    if (out.includes(name)) return;
+    for (const r of refs(defs[name])) if (r !== name) visit(r);
+    out.push(name);
+  };
+  Object.keys(defs).forEach(visit);
+  return out;
+}
+
+function catalogTs(catalog: Catalog): string {
+  const defs = { ...catalog.defs, Binding: BINDING };
+  const defLines = sortedDefs(defs).map((name) => `export const ${name} = ${zodOf(defs[name]!)};`);
+  const wire = catalog.components.map((c) => `  ${c.name}: ${zodOf(c.schema)},`);
+  const model = catalog.components.filter((c) => !c.serverOnly).map((c) => `  ${c.name}: ${zodOf(modelSchema(c.schema))},`);
+  const meta = catalog.components.map((c) => ({
+    name: c.name,
+    description: c.description,
+    permission: c.permission,
+    serverOnly: c.serverOnly,
+  }));
+  const modelJson = Object.fromEntries(
+    catalog.components.filter((c) => !c.serverOnly).map((c) => [c.name, stripAnnotations(modelSchema(c.schema))]),
+  );
+  const rawJson = Object.fromEntries(catalog.components.map((c) => [c.name, c.schema]));
+  return `${HEADER}
+import { z } from "zod";
+
+${defLines.join("\n")}
+
+/** The shape each component has on the wire, after the server resolves bindings. */
+export const WIRE = {
+${wire.join("\n")}
+} as const;
+
+/** The shape the model writes. Bindable properties also accept {"bind": "..."}. */
+export const MODEL = {
+${model.join("\n")}
+} as const;
+
+export type ComponentName = keyof typeof WIRE;
+
+export const COMPONENTS: readonly { name: ComponentName; description: string; permission: string | null; serverOnly: boolean }[] = ${JSON.stringify(meta, null, 2)};
+
+/** JSON Schema for each model-writable component, used to describe the catalog to the model. */
+export const MODEL_JSON_SCHEMAS: Record<string, unknown> = ${JSON.stringify(modelJson, null, 2)};
+
+export const DEFS_JSON_SCHEMA: Record<string, unknown> = ${JSON.stringify(stripAnnotations(defs), null, 2)};
+
+/** The source schemas with their x- annotations, for walking field, action and child references. */
+export const ANNOTATED_SCHEMAS: Record<string, unknown> = ${JSON.stringify(rawJson, null, 2)};
+
+export const ANNOTATED_DEFS: Record<string, unknown> = ${JSON.stringify(catalog.defs, null, 2)};
+`;
+}
+
 type Output = { path: string; content: string };
 
 export function outputs(): Output[] {
   const permissions = loadPermissions();
-  return [{ path: join(ROOT, "apps/server/src/generated/permissions.ts"), content: permissionsTs(permissions) }];
+  const catalog = loadCatalog(join(SCHEMA_DIR, "components"), new Set(Object.keys(permissions.permissions)));
+  return [
+    { path: join(ROOT, "apps/server/src/generated/permissions.ts"), content: permissionsTs(permissions) },
+    { path: join(ROOT, "apps/server/src/generated/catalog.ts"), content: catalogTs(catalog) },
+    { path: join(ROOT, "packages/erp_design/lib/src/catalog/generated.dart"), content: dartModels(catalog) },
+  ];
 }
 
 const check = process.argv.includes("--check");
