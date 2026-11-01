@@ -88,28 +88,28 @@ final class ErpColors {
 
   /// Every text color paired with every background it is drawn on.
   Map<String, (Color, Color)> get textPairs => {
-        for (final (fgName, fg) in [
-          ('text', text),
-          ('textSecondary', textSecondary),
-          ('textMuted', textMuted),
-          ('accent', accent),
-        ])
-          for (final (bgName, bgColor) in [
-            ('bg', bg),
-            ('surface', surface),
-            ('surfaceSunken', surfaceSunken),
-            ('accentSubtle', accentSubtle),
-          ])
-            '$fgName on $bgName': (fg, bgColor),
-        'success on successBg': (success, successBg),
-        'warning on warningBg': (warning, warningBg),
-        'danger on dangerBg': (danger, dangerBg),
-        'success on surface': (success, surface),
-        'warning on surface': (warning, surface),
-        'danger on surface': (danger, surface),
-        'onAccent on accent': (onAccent, accent),
-        'onAccent on accentHover': (onAccent, accentHover),
-      };
+    for (final (fgName, fg) in [
+      ('text', text),
+      ('textSecondary', textSecondary),
+      ('textMuted', textMuted),
+      ('accent', accent),
+    ])
+      for (final (bgName, bgColor) in [
+        ('bg', bg),
+        ('surface', surface),
+        ('surfaceSunken', surfaceSunken),
+        ('accentSubtle', accentSubtle),
+      ])
+        '$fgName on $bgName': (fg, bgColor),
+    'success on successBg': (success, successBg),
+    'warning on warningBg': (warning, warningBg),
+    'danger on dangerBg': (danger, dangerBg),
+    'success on surface': (success, surface),
+    'warning on surface': (warning, surface),
+    'danger on surface': (danger, surface),
+    'onAccent on accent': (onAccent, accent),
+    'onAccent on accentHover': (onAccent, accentHover),
+  };
 }
 
 /// The 4 pt spacing grid.
@@ -158,21 +158,45 @@ final class ErpType {
   static const _tabular = [FontFeature.tabularFigures()];
 
   TextStyle get display => TextStyle(
-      fontFamily: sansFamily, fontSize: 28, height: 34 / 28, fontWeight: FontWeight.w600, letterSpacing: -0.2, color: color);
+    fontFamily: sansFamily,
+    fontSize: 28,
+    height: 34 / 28,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -0.2,
+    color: color,
+  );
   TextStyle get title => TextStyle(
-      fontFamily: sansFamily, fontSize: 20, height: 28 / 20, fontWeight: FontWeight.w600, letterSpacing: -0.2, color: color);
+    fontFamily: sansFamily,
+    fontSize: 20,
+    height: 28 / 20,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -0.2,
+    color: color,
+  );
   TextStyle get heading =>
       TextStyle(fontFamily: sansFamily, fontSize: 16, height: 24 / 16, fontWeight: FontWeight.w600, color: color);
-  TextStyle get body => TextStyle(fontFamily: sansFamily, fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w400, color: color);
+  TextStyle get body =>
+      TextStyle(fontFamily: sansFamily, fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w400, color: color);
   TextStyle get bodySecondary => body.copyWith(color: secondary);
   TextStyle get bodyStrong =>
       TextStyle(fontFamily: sansFamily, fontSize: 14, height: 20 / 14, fontWeight: FontWeight.w500, color: color);
   TextStyle get caption =>
       TextStyle(fontFamily: sansFamily, fontSize: 12, height: 16 / 12, fontWeight: FontWeight.w400, color: muted);
   TextStyle get mono => TextStyle(
-      fontFamily: monoFamily, fontSize: 13, height: 20 / 13, fontWeight: FontWeight.w400, color: color, fontFeatures: _tabular);
+    fontFamily: monoFamily,
+    fontSize: 13,
+    height: 20 / 13,
+    fontWeight: FontWeight.w400,
+    color: color,
+    fontFeatures: _tabular,
+  );
   TextStyle get numeric => body.copyWith(fontFeatures: _tabular);
   TextStyle get kpi => title.copyWith(fontFeatures: _tabular);
-  TextStyle get statusLabel =>
-      const TextStyle(fontFamily: sansFamily, fontSize: 11, height: 16 / 11, fontWeight: FontWeight.w500, letterSpacing: 0.4);
+  TextStyle get statusLabel => const TextStyle(
+    fontFamily: sansFamily,
+    fontSize: 11,
+    height: 16 / 11,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.4,
+  );
 }

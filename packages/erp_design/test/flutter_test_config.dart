@@ -22,7 +22,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
     'fonts/IBMPlexSans-SemiBold.ttf',
   ]);
   await load('packages/erp_design/IBMPlexMono', ['fonts/IBMPlexMono-Regular.ttf', 'fonts/IBMPlexMono-Medium.ttf']);
-  final icons = File('${Platform.environment['FLUTTER_ROOT']}/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
+  final icons = File(
+    '${Platform.environment['FLUTTER_ROOT']}/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
+  );
   if (icons.existsSync()) {
     final loader = FontLoader('MaterialIcons')..addFont(Future.value(ByteData.sublistView(icons.readAsBytesSync())));
     await loader.load();

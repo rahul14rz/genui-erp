@@ -14,31 +14,40 @@ class KpiStripView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return LayoutBuilder(builder: (context, box) {
-      final perRow = box.maxWidth < Breakpoints.phone ? 2 : data.items.length;
-      final cells = [for (final item in data.items) _KpiCell(item)];
-      final rows = <Widget>[];
-      for (var i = 0; i < cells.length; i += perRow) {
-        final slice = cells.sublist(i, (i + perRow).clamp(0, cells.length));
-        rows.add(IntrinsicHeight(
-          child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            for (var j = 0; j < slice.length; j++) ...[
-              if (j > 0) VerticalDivider(width: 1, thickness: 1, color: c.border),
-              Expanded(child: slice[j]),
+    return LayoutBuilder(
+      builder: (context, box) {
+        final perRow = box.maxWidth < Breakpoints.phone ? 2 : data.items.length;
+        final cells = [for (final item in data.items) _KpiCell(item)];
+        final rows = <Widget>[];
+        for (var i = 0; i < cells.length; i += perRow) {
+          final slice = cells.sublist(i, (i + perRow).clamp(0, cells.length));
+          rows.add(
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var j = 0; j < slice.length; j++) ...[
+                    if (j > 0) VerticalDivider(width: 1, thickness: 1, color: c.border),
+                    Expanded(child: slice[j]),
+                  ],
+                ],
+              ),
+            ),
+          );
+        }
+        return ErpSurface(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              for (var i = 0; i < rows.length; i++) ...[
+                if (i > 0) Divider(height: 1, thickness: 1, color: c.border),
+                rows[i],
+              ],
             ],
-          ]),
-        ));
-      }
-      return ErpSurface(
-        padding: EdgeInsets.zero,
-        child: Column(children: [
-          for (var i = 0; i < rows.length; i++) ...[
-            if (i > 0) Divider(height: 1, thickness: 1, color: c.border),
-            rows[i],
-          ],
-        ]),
-      );
-    });
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -62,13 +71,22 @@ class _KpiCell extends StatelessWidget {
     }
     return Padding(
       padding: const EdgeInsets.all(Space.x4),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(item.label, style: t.caption.copyWith(color: c.textSecondary)),
-        const SizedBox(height: Space.x1),
-        Text(Fmt.format(item.format, item.value, compact: true), style: t.kpi),
-        const SizedBox(height: Space.x1),
-        Text(delta ?? ' ', style: t.caption.copyWith(color: deltaColor ?? c.textMuted, fontFeatures: const [FontFeature.tabularFigures()])),
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(item.label, style: t.caption.copyWith(color: c.textSecondary)),
+          const SizedBox(height: Space.x1),
+          Text(Fmt.format(item.format, item.value, compact: true), style: t.kpi),
+          const SizedBox(height: Space.x1),
+          Text(
+            delta ?? ' ',
+            style: t.caption.copyWith(
+              color: deltaColor ?? c.textMuted,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -79,19 +97,24 @@ class KpiStripSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ErpSurface(
-        child: Row(children: [
-          for (var i = 0; i < count; i++) ...[
-            if (i > 0) const SizedBox(width: Space.x6),
-            const Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    child: Row(
+      children: [
+        for (var i = 0; i < count; i++) ...[
+          if (i > 0) const SizedBox(width: Space.x6),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 SkeletonBlock(width: 80, height: 12),
                 SizedBox(height: Space.x2),
                 SkeletonBlock(width: 120, height: 24),
                 SizedBox(height: Space.x2),
                 SkeletonBlock(width: 140, height: 12),
-              ]),
+              ],
             ),
-          ],
-        ]),
-      );
+          ),
+        ],
+      ],
+    ),
+  );
 }

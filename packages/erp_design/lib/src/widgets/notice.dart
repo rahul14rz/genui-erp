@@ -35,21 +35,30 @@ class NoticeView extends StatelessWidget {
           borderRadius: Radii.surface,
           border: Border.all(color: fg.withValues(alpha: 0.35)),
         ),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Padding(padding: const EdgeInsets.only(top: 2), child: Icon(icon, size: 16, color: fg)),
-          const SizedBox(width: Space.x3),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(data.title, style: t.bodyStrong),
-              const SizedBox(height: Space.x1),
-              Text(data.body, style: t.bodySecondary),
-              if (data.nextStep != null) ...[
-                const SizedBox(height: Space.x2),
-                Text(data.nextStep!, style: t.body.copyWith(color: fg)),
-              ],
-            ]),
-          ),
-        ]),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Icon(icon, size: 16, color: fg),
+            ),
+            const SizedBox(width: Space.x3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(data.title, style: t.bodyStrong),
+                  const SizedBox(height: Space.x1),
+                  Text(data.body, style: t.bodySecondary),
+                  if (data.nextStep != null) ...[
+                    const SizedBox(height: Space.x2),
+                    Text(data.nextStep!, style: t.body.copyWith(color: fg)),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

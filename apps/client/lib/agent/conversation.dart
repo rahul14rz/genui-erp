@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:a2ui_core/a2ui_core.dart' as core;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:genui/genui.dart';
 
@@ -39,17 +40,16 @@ final class Turn {
     List<String>? notes,
     bool? done,
     bool? failed,
-  }) =>
-      Turn(
-        id: id,
-        question: question,
-        status: status == null ? this.status : status(),
-        pending: pending ?? this.pending,
-        surfaces: surfaces ?? this.surfaces,
-        notes: notes ?? this.notes,
-        done: done ?? this.done,
-        failed: failed ?? this.failed,
-      );
+  }) => Turn(
+    id: id,
+    question: question,
+    status: status == null ? this.status : status(),
+    pending: pending ?? this.pending,
+    surfaces: surfaces ?? this.surfaces,
+    notes: notes ?? this.notes,
+    done: done ?? this.done,
+    failed: failed ?? this.failed,
+  );
 }
 
 final class ConversationState {
@@ -100,6 +100,22 @@ class ConversationController extends Notifier<ConversationState> {
     }
   }
 
+  /// Feeds server messages straight into a new turn, for widget tests.
+  @visibleForTesting
+  void debugShow(String question, List<Map<String, Object?>> messages) {
+    final ids = <String>[];
+    for (final m in messages) {
+      if (m['createSurface'] case {'surfaceId': final String id}) ids.add(id);
+      surfaces.handleMessage(core.A2uiMessage.fromJson(m));
+    }
+    state = ConversationState(
+      turns: [
+        ...state.turns,
+        Turn(id: ++_seq, question: question, surfaces: ids, done: true),
+      ],
+    );
+  }
+
   void _enqueue(Future<void> Function() job) => _queue = _queue.then((_) => job());
 
   void _update(int id, Turn Function(Turn) f) {
@@ -117,7 +133,15 @@ class ConversationController extends Notifier<ConversationState> {
           if (json['createSurface'] case {'surfaceId': final String id}) {
             _update(turnId, (t) => t.copyWith(surfaces: [...t.surfaces, id], pending: const []));
           } else if (json['deleteSurface'] case {'surfaceId': final String id}) {
-            _update(turnId, (t) => t.copyWith(surfaces: [for (final s in t.surfaces) if (s != id) s]));
+            _update(
+              turnId,
+              (t) => t.copyWith(
+                surfaces: [
+                  for (final s in t.surfaces)
+                    if (s != id) s,
+                ],
+              ),
+            );
           }
           surfaces.handleMessage(core.A2uiMessage.fromJson(json));
         case AnswerText(:final text):

@@ -13,3 +13,5 @@ linter:
     - prefer_final_locals
     - avoid_print
     - always_declare_return_types
+formatter:
+  page_width: 120

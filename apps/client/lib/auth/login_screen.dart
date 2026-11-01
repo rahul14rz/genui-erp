@@ -46,45 +46,67 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           padding: const EdgeInsets.all(Space.x4),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              Text('genui-erp', style: t.display),
-              const SizedBox(height: Space.x1),
-              Text('Sign in to ask questions about your orders, stock and invoices.', style: t.bodySecondary),
-              const SizedBox(height: Space.x6),
-              ErpSurface(
-                padding: const EdgeInsets.all(Space.x6),
-                child: AutofillGroup(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    Text('Email', style: t.bodyStrong),
-                    const SizedBox(height: Space.x1),
-                    TextField(controller: _email, autofillHints: const [AutofillHints.email], keyboardType: TextInputType.emailAddress),
-                    const SizedBox(height: Space.x4),
-                    Text('Password', style: t.bodyStrong),
-                    const SizedBox(height: Space.x1),
-                    TextField(controller: _password, obscureText: true, autofillHints: const [AutofillHints.password], onSubmitted: (_) => _submit()),
-                    const SizedBox(height: Space.x4),
-                    if (auth.error != null) ...[
-                      NoticeView(Notice.fromJson({'tone': 'danger', 'title': 'Could not sign in', 'body': auth.error})),
-                      const SizedBox(height: Space.x4),
-                    ],
-                    ErpButton(label: 'Sign in', kind: ButtonKind.primary, busy: auth.busy, onPressed: _submit),
-                  ]),
-                ),
-              ),
-              if (showDemoAccounts) ...[
-                const SizedBox(height: Space.x6),
-                Text('Local demo accounts', style: t.bodyStrong),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('genui-erp', style: t.display),
                 const SizedBox(height: Space.x1),
-                Text('Password for all: genui-erp-local. For local use only.', style: t.caption),
-                const SizedBox(height: Space.x2),
-                for (final (tenant, email, role) in _demoAccounts)
-                  _DemoAccount(tenant: tenant, email: email, role: role, onTap: () {
-                    _email.text = email;
-                    _password.text = 'genui-erp-local';
-                    _submit();
-                  }),
+                Text('Sign in to ask questions about your orders, stock and invoices.', style: t.bodySecondary),
+                const SizedBox(height: Space.x6),
+                ErpSurface(
+                  padding: const EdgeInsets.all(Space.x6),
+                  child: AutofillGroup(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text('Email', style: t.bodyStrong),
+                        const SizedBox(height: Space.x1),
+                        TextField(
+                          controller: _email,
+                          autofillHints: const [AutofillHints.email],
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        const SizedBox(height: Space.x4),
+                        Text('Password', style: t.bodyStrong),
+                        const SizedBox(height: Space.x1),
+                        TextField(
+                          controller: _password,
+                          obscureText: true,
+                          autofillHints: const [AutofillHints.password],
+                          onSubmitted: (_) => _submit(),
+                        ),
+                        const SizedBox(height: Space.x4),
+                        if (auth.error != null) ...[
+                          NoticeView(
+                            Notice.fromJson({'tone': 'danger', 'title': 'Could not sign in', 'body': auth.error}),
+                          ),
+                          const SizedBox(height: Space.x4),
+                        ],
+                        ErpButton(label: 'Sign in', kind: ButtonKind.primary, busy: auth.busy, onPressed: _submit),
+                      ],
+                    ),
+                  ),
+                ),
+                if (showDemoAccounts) ...[
+                  const SizedBox(height: Space.x6),
+                  Text('Local demo accounts', style: t.bodyStrong),
+                  const SizedBox(height: Space.x1),
+                  Text('Password for all: genui-erp-local. For local use only.', style: t.caption),
+                  const SizedBox(height: Space.x2),
+                  for (final (tenant, email, role) in _demoAccounts)
+                    _DemoAccount(
+                      tenant: tenant,
+                      email: email,
+                      role: role,
+                      onTap: () {
+                        _email.text = email;
+                        _password.text = 'genui-erp-local';
+                        _submit();
+                      },
+                    ),
+                ],
               ],
-            ]),
+            ),
           ),
         ),
       ),
@@ -110,11 +132,20 @@ class _DemoAccount extends StatelessWidget {
         borderRadius: Radii.control,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: Space.x2, horizontal: Space.x2),
-          child: Row(children: [
-            SizedBox(width: 90, child: Text(role, style: t.body)),
-            Expanded(child: Text(tenant, style: t.bodySecondary)),
-            Text(email, style: t.mono.copyWith(color: context.colors.textMuted)),
-          ]),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('$role, $tenant', style: t.body),
+                    Text(email, style: t.mono.copyWith(color: context.colors.textMuted)),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward, size: 16, color: context.colors.textMuted),
+            ],
+          ),
         ),
       ),
     );

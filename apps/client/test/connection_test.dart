@@ -8,15 +8,15 @@ import 'package:http/testing.dart';
 String frame(Map<String, Object?> result) => 'data: ${jsonEncode({'jsonrpc': '2.0', 'id': 1, 'result': result})}\n\n';
 
 Map<String, Object?> update(List<Map<String, Object?>> parts, {String state = 'working', bool last = false}) => {
-      'kind': 'status-update',
-      'taskId': 't1',
-      'contextId': 'ctx-1',
-      'final': last,
-      'status': {
-        'state': state,
-        'message': {'kind': 'message', 'role': 'agent', 'messageId': 'm', 'parts': parts},
-      },
-    };
+  'kind': 'status-update',
+  'taskId': 't1',
+  'contextId': 'ctx-1',
+  'final': last,
+  'status': {
+    'state': state,
+    'message': {'kind': 'message', 'role': 'agent', 'messageId': 'm', 'parts': parts},
+  },
+};
 
 void main() {
   test('maps server frames to agent events and keeps the context id', () async {
@@ -24,10 +24,43 @@ void main() {
     final client = MockClient.streaming((request, body) async {
       seen = request as http.Request;
       final sse = [
-        frame(update([{'kind': 'data', 'data': {'erpStatus': 'Reading orders'}}])),
-        frame(update([{'kind': 'data', 'data': {'erpPending': {'surfaceId': 's1', 'components': ['DataTable']}}}])),
-        frame(update([{'kind': 'data', 'data': {'version': 'v0.9', 'createSurface': {'surfaceId': 's1', 'catalogId': 'c'}}}])),
-        frame(update([{'kind': 'text', 'text': 'Here are your orders.'}])),
+        frame(
+          update([
+            {
+              'kind': 'data',
+              'data': {'erpStatus': 'Reading orders'},
+            },
+          ]),
+        ),
+        frame(
+          update([
+            {
+              'kind': 'data',
+              'data': {
+                'erpPending': {
+                  'surfaceId': 's1',
+                  'components': ['DataTable'],
+                },
+              },
+            },
+          ]),
+        ),
+        frame(
+          update([
+            {
+              'kind': 'data',
+              'data': {
+                'version': 'v0.9',
+                'createSurface': {'surfaceId': 's1', 'catalogId': 'c'},
+              },
+            },
+          ]),
+        ),
+        frame(
+          update([
+            {'kind': 'text', 'text': 'Here are your orders.'},
+          ]),
+        ),
         frame(update([], state: 'completed', last: true)),
       ].join();
       return http.StreamedResponse(Stream.value(utf8.encode(sse)), 200, headers: {'content-type': 'text/event-stream'});

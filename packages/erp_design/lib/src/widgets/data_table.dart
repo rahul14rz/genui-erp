@@ -47,9 +47,9 @@ class _DataTableViewState extends State<DataTableView> {
   }
 
   List<g.ActionRef> get _actions => [
-        for (final a in widget.data.rowActions ?? const <g.ActionRef>[])
-          if (widget.allowedActions == null || widget.allowedActions!.contains(a.action)) a,
-      ];
+    for (final a in widget.data.rowActions ?? const <g.ActionRef>[])
+      if (widget.allowedActions == null || widget.allowedActions!.contains(a.action)) a,
+  ];
 
   KeyEventResult _onKey(FocusNode node, KeyEvent e) {
     if (e is! KeyDownEvent && e is! KeyRepeatEvent) return KeyEventResult.ignored;
@@ -76,37 +76,60 @@ class _DataTableViewState extends State<DataTableView> {
     final t = context.type;
     return ErpSurface(
       padding: EdgeInsets.zero,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        if (d.title != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.x4, Space.x3, Space.x4, Space.x3),
-            child: Text(d.title!, style: t.heading),
-          ),
-        if (d.rows.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(Space.x6),
-            child: Text(d.emptyText ?? 'No rows match these filters. Widen the date range or clear a filter.',
-                style: t.bodySecondary, textAlign: TextAlign.center),
-          )
-        else
-          Focus(
-            focusNode: _focus,
-            onKeyEvent: _onKey,
-            onFocusChange: (f) => setState(() => _row = f ? (_row ?? 0) : null),
-            child: LayoutBuilder(
-              builder: (context, box) => box.maxWidth < Breakpoints.phone ? _stacked(context) : _grid(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (d.title != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Space.x4, Space.x3, Space.x4, Space.x3),
+              child: Text(d.title!, style: t.heading),
             ),
-          ),
-        _footer(context),
-      ]),
+          if (d.rows.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(Space.x6),
+              child: Text(
+                d.emptyText ?? 'No rows match these filters. Widen the date range or clear a filter.',
+                style: t.bodySecondary,
+                textAlign: TextAlign.center,
+              ),
+            )
+          else
+            Focus(
+              focusNode: _focus,
+              onKeyEvent: _onKey,
+              onFocusChange: (f) => setState(() => _row = f ? (_row ?? 0) : null),
+              child: LayoutBuilder(
+                builder: (context, box) => box.maxWidth < _minGridWidth ? _stacked(context) : _grid(context),
+              ),
+            ),
+          _footer(context),
+        ],
+      ),
     );
   }
 
+  /// The narrowest width at which every column still fits on one line. Below
+  /// it, rows stack, which reads better than wrapped order numbers.
+  double get _minGridWidth {
+    double w = Space.x4 * 2;
+    for (final c in widget.data.columns) {
+      w +=
+          Space.x3 +
+          switch (c.type) {
+            g.CellType.text => 110,
+            g.CellType.mono || g.CellType.status => 100,
+            g.CellType.date || g.CellType.datetime => 104,
+            _ => 88,
+          };
+    }
+    return w + _actionWidth * _actions.length;
+  }
+
   int _flex(g.CellType type) => switch (type) {
-        g.CellType.text => 3,
-        g.CellType.status => 2,
-        _ => 2,
-      };
+    g.CellType.text => 3,
+    g.CellType.status => 2,
+    _ => 2,
+  };
 
   Widget _grid(BuildContext context) {
     final d = widget.data;
@@ -116,40 +139,61 @@ class _DataTableViewState extends State<DataTableView> {
     Widget header(g.DataTableColumn col) {
       final active = d.sort?.key == col.key;
       final dir = d.sort?.direction ?? g.DataTableSortDirection.desc;
-      final label = Text(col.label, style: t.bodyStrong.copyWith(color: c.textSecondary), overflow: TextOverflow.ellipsis);
+      final label = Text(
+        col.label,
+        style: t.bodyStrong.copyWith(color: c.textSecondary),
+        overflow: TextOverflow.ellipsis,
+      );
       final align = Fmt.isNumeric(col.type) ? MainAxisAlignment.end : MainAxisAlignment.start;
-      final content = Row(mainAxisAlignment: align, children: [
-        Flexible(child: label),
-        if (active)
-          Icon(dir == g.DataTableSortDirection.asc ? Icons.arrow_upward : Icons.arrow_downward, size: 14, color: c.textSecondary),
-      ]);
+      final content = Row(
+        mainAxisAlignment: align,
+        children: [
+          Flexible(child: label),
+          if (active)
+            Icon(
+              dir == g.DataTableSortDirection.asc ? Icons.arrow_upward : Icons.arrow_downward,
+              size: 14,
+              color: c.textSecondary,
+            ),
+        ],
+      );
       if (col.sortable != true || widget.onSort == null) return content;
-      final next = active && dir == g.DataTableSortDirection.desc ? g.DataTableSortDirection.asc : g.DataTableSortDirection.desc;
+      final next = active && dir == g.DataTableSortDirection.desc
+          ? g.DataTableSortDirection.asc
+          : g.DataTableSortDirection.desc;
       return MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: GestureDetector(onTap: () => widget.onSort!(col.key, next), child: Semantics(button: true, child: content)),
+        child: GestureDetector(
+          onTap: () => widget.onSort!(col.key, next),
+          child: Semantics(button: true, child: content),
+        ),
       );
     }
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Container(
-        height: 36,
-        padding: const EdgeInsets.symmetric(horizontal: Space.x4),
-        decoration: BoxDecoration(color: c.surfaceSunken, border: Border.symmetric(horizontal: BorderSide(color: c.border))),
-        child: Row(children: [
-          for (final col in d.columns) ...[
-            Expanded(flex: _flex(col.type), child: header(col)),
-            const SizedBox(width: Space.x3),
-          ],
-          if (actions.isNotEmpty) SizedBox(width: 140.0 * actions.length),
-        ]),
-      ),
-      for (var i = 0; i < d.rows.length; i++)
-        MouseRegion(
-          onEnter: (_) => setState(() => _hover = i),
-          onExit: (_) => setState(() => _hover = null),
-          child: GestureDetector(
-            onTap: widget.onRowOpen == null ? null : () => widget.onRowOpen!(d.rows[i]),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: Space.x4),
+          decoration: BoxDecoration(
+            color: c.surfaceSunken,
+            border: Border.symmetric(horizontal: BorderSide(color: c.border)),
+          ),
+          child: Row(
+            children: [
+              for (final col in d.columns) ...[
+                Expanded(flex: _flex(col.type), child: header(col)),
+                const SizedBox(width: Space.x3),
+              ],
+              if (actions.isNotEmpty) SizedBox(width: _actionWidth * actions.length),
+            ],
+          ),
+        ),
+        for (var i = 0; i < d.rows.length; i++)
+          MouseRegion(
+            onEnter: (_) => setState(() => _hover = i),
+            onExit: (_) => setState(() => _hover = null),
             child: Container(
               constraints: const BoxConstraints(minHeight: 40),
               padding: const EdgeInsets.symmetric(horizontal: Space.x4, vertical: Space.x2),
@@ -160,27 +204,61 @@ class _DataTableViewState extends State<DataTableView> {
                   left: BorderSide(color: _row == i ? c.accent : Colors.transparent, width: 2),
                 ),
               ),
-              child: Row(children: [
-                for (final col in d.columns) ...[
-                  Expanded(flex: _flex(col.type), child: _Cell(col.type, d.rows[i][col.key])),
-                  const SizedBox(width: Space.x3),
-                ],
-                if (actions.isNotEmpty)
-                  SizedBox(
-                    width: 140.0 * actions.length,
-                    child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      for (final a in actions)
-                        Padding(
-                          padding: const EdgeInsets.only(left: Space.x2),
-                          child: ErpButton(label: a.label, dense: true, onPressed: () => widget.onRowAction?.call(a, d.rows[i])),
-                        ),
-                    ]),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _openable(
+                      i,
+                      Row(
+                        children: [
+                          for (final col in d.columns) ...[
+                            Expanded(flex: _flex(col.type), child: _Cell(col.type, d.rows[i][col.key])),
+                            const SizedBox(width: Space.x3),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-              ]),
+                  if (actions.isNotEmpty)
+                    SizedBox(
+                      width: _actionWidth * actions.length,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          for (final a in actions)
+                            Padding(
+                              padding: const EdgeInsets.only(left: Space.x2),
+                              child: ErpButton(
+                                label: a.label,
+                                dense: true,
+                                onPressed: () => widget.onRowAction?.call(a, d.rows[i]),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
-        ),
-    ]);
+      ],
+    );
+  }
+
+  static const _actionWidth = 140.0;
+
+  /// The part of a row that opens it. Row actions sit beside it, not inside,
+  /// because a button inside a button is unreachable to assistive tech.
+  Widget _openable(int i, Widget child) {
+    final lead = widget.data.columns.first;
+    final open = widget.onRowOpen == null ? null : () => widget.onRowOpen!(widget.data.rows[i]);
+    return Semantics(
+      container: true,
+      button: open != null,
+      label: 'Open ${widget.data.rows[i][lead.key] ?? 'row ${i + 1}'}',
+      onTap: open,
+      child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: open, child: child),
+    );
   }
 
   Widget _stacked(BuildContext context) {
@@ -191,42 +269,67 @@ class _DataTableViewState extends State<DataTableView> {
     final status = d.columns.where((col) => col.type == g.CellType.status).firstOrNull;
     final rest = d.columns.where((col) => col != lead && col != status).toList();
     final actions = _actions;
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      for (var i = 0; i < d.rows.length; i++)
-        GestureDetector(
-          onTap: widget.onRowOpen == null ? null : () => widget.onRowOpen!(d.rows[i]),
-          child: Container(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < d.rows.length; i++)
+          Container(
             padding: const EdgeInsets.all(Space.x3),
             decoration: BoxDecoration(
               color: _row == i ? c.accentSubtle : null,
               border: Border(top: BorderSide(color: c.border)),
             ),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Expanded(child: _Cell(lead.type, d.rows[i][lead.key], strong: true)),
-                if (status != null) StatusBadge('${d.rows[i][status.key] ?? ''}'),
-              ]),
-              const SizedBox(height: Space.x1),
-              for (final col in rest)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Row(children: [
-                    SizedBox(width: 120, child: Text(col.label, style: t.caption.copyWith(color: c.textSecondary))),
-                    Expanded(child: _Cell(col.type, d.rows[i][col.key], alignEnd: false)),
-                  ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _openable(
+                  i,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: _Cell(lead.type, d.rows[i][lead.key], strong: true)),
+                          if (status != null) StatusBadge('${d.rows[i][status.key] ?? ''}'),
+                        ],
+                      ),
+                      const SizedBox(height: Space.x1),
+                      for (final col in rest)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 120,
+                                child: Text(col.label, style: t.caption.copyWith(color: c.textSecondary)),
+                              ),
+                              Expanded(child: _Cell(col.type, d.rows[i][col.key], alignEnd: false)),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              if (actions.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: Space.x2),
-                  child: Wrap(spacing: Space.x2, children: [
-                    for (final a in actions)
-                      ErpButton(label: a.label, dense: true, onPressed: () => widget.onRowAction?.call(a, d.rows[i])),
-                  ]),
-                ),
-            ]),
+                if (actions.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: Space.x2),
+                    child: Wrap(
+                      spacing: Space.x2,
+                      children: [
+                        for (final a in actions)
+                          ErpButton(
+                            label: a.label,
+                            dense: true,
+                            onPressed: () => widget.onRowAction?.call(a, d.rows[i]),
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
-    ]);
+      ],
+    );
   }
 
   Widget _footer(BuildContext context) {
@@ -240,24 +343,32 @@ class _DataTableViewState extends State<DataTableView> {
     final to = offset + d.rows.length;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: Space.x4, vertical: Space.x2),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: c.border))),
-      child: Row(children: [
-        Expanded(
-          child: Text('${Fmt.grouped(from)}–${Fmt.grouped(to)} of ${Fmt.grouped(total)}',
-              style: context.type.caption.copyWith(fontFeatures: const [FontFeature.tabularFigures()])),
-        ),
-        ErpButton(
-          label: 'Previous',
-          dense: true,
-          onPressed: offset > 0 && widget.onPage != null ? () => widget.onPage!((offset - size).clamp(0, total)) : null,
-        ),
-        const SizedBox(width: Space.x2),
-        ErpButton(
-          label: 'Next',
-          dense: true,
-          onPressed: to < total && widget.onPage != null ? () => widget.onPage!(offset + size) : null,
-        ),
-      ]),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: c.border)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              '${Fmt.grouped(from)}–${Fmt.grouped(to)} of ${Fmt.grouped(total)}',
+              style: context.type.caption.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+            ),
+          ),
+          ErpButton(
+            label: 'Previous',
+            dense: true,
+            onPressed: offset > 0 && widget.onPage != null
+                ? () => widget.onPage!((offset - size).clamp(0, total))
+                : null,
+          ),
+          const SizedBox(width: Space.x2),
+          ErpButton(
+            label: 'Next',
+            dense: true,
+            onPressed: to < total && widget.onPage != null ? () => widget.onPage!(offset + size) : null,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -284,12 +395,14 @@ class _Cell extends StatelessWidget {
       g.CellType.date || g.CellType.datetime => t.numeric.copyWith(color: context.colors.textSecondary),
       _ => strong ? t.bodyStrong : t.body,
     };
+    final oneLine = type != g.CellType.text;
     return Text(
       text,
       style: strong ? style.copyWith(fontWeight: FontWeight.w500) : style,
       textAlign: numeric && alignEnd ? TextAlign.right : TextAlign.left,
       overflow: TextOverflow.ellipsis,
-      maxLines: 2,
+      softWrap: !oneLine,
+      maxLines: oneLine ? 1 : 2,
     );
   }
 }
@@ -303,20 +416,35 @@ class DataTableSkeleton extends StatelessWidget {
     final c = context.colors;
     return ErpSurface(
       padding: EdgeInsets.zero,
-      child: Column(children: [
-        Container(height: 36, color: c.surfaceSunken),
-        for (var i = 0; i < rows; i++)
-          Container(
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: Space.x4),
-            decoration: BoxDecoration(border: Border(top: BorderSide(color: c.border))),
-            child: const Row(children: [
-              Expanded(flex: 2, child: Align(alignment: Alignment.centerLeft, child: SkeletonBlock(width: 72, height: 12))),
-              Expanded(flex: 3, child: Align(alignment: Alignment.centerLeft, child: SkeletonBlock(width: 140, height: 12))),
-              Expanded(flex: 2, child: Align(alignment: Alignment.centerRight, child: SkeletonBlock(width: 64, height: 12))),
-            ]),
-          ),
-      ]),
+      child: Column(
+        children: [
+          Container(height: 36, color: c.surfaceSunken),
+          for (var i = 0; i < rows; i++)
+            Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: Space.x4),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: c.border)),
+              ),
+              child: const Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Align(alignment: Alignment.centerLeft, child: SkeletonBlock(width: 72, height: 12)),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Align(alignment: Alignment.centerLeft, child: SkeletonBlock(width: 140, height: 12)),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Align(alignment: Alignment.centerRight, child: SkeletonBlock(width: 64, height: 12)),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

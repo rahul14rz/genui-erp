@@ -35,8 +35,17 @@ const refusal = (title: string, body: string, nextStep: string) => ({
 const orderNumber = (q: string) => q.match(/\b(SO-\d{5})\b/i)?.[1]?.toUpperCase();
 const customerCode = (q: string) => q.match(/\b([NC]\d{4})\b/)?.[1];
 
+/** The last three complete calendar months, so totals have a full previous period to compare with. */
+function lastFullMonths(today: string, months = 3) {
+  const d = new Date(`${today}T00:00:00Z`);
+  const end = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 0));
+  const start = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - months, 1));
+  return { from: start.toISOString().slice(0, 10), to: end.toISOString().slice(0, 10) };
+}
+
 /** Keyword plans covering the questions the demo and the evals ask. */
-function plan(q: string): Plan | null {
+function plan(q: string, today: string): Plan | null {
+  const window = lastFullMonths(today);
   const s = q.toLowerCase();
   const order = orderNumber(q);
   if (order) {
@@ -70,9 +79,9 @@ function plan(q: string): Plan | null {
   if (/margin|profit|cost/.test(s)) {
     return {
       tool: "getMargins",
-      args: { groupBy: s.includes("product") ? "product" : s.includes("customer") ? "customer" : "category", from: "2026-01-01" },
+      args: { groupBy: s.includes("product") ? "product" : s.includes("customer") ? "customer" : "category", ...window },
       layout: (r) => ({
-        say: "Gross margin by category since January.",
+        say: "Gross margin for the last three full months.",
         components: [
           panel("Gross margin", ["k", "b", "t"], ["Which products have the lowest margin?", "Show margin by customer"]),
           {
@@ -208,10 +217,13 @@ function plan(q: string): Plan | null {
     return {
       tool: "listInvoices",
       args: { overdue: true, limit: 25 },
-      layout: (r) => ({
+      layout: (r, _has, data) => ({
         say: "Unpaid invoices past their due date, oldest first.",
         components: [
-          panel("Overdue invoices", ["k", "t"], ["Show the ledger for the largest debtor", "Which credit requests are pending?"]),
+          panel("Overdue invoices", ["k", "t"], [
+            ...(Array.isArray(data?.rows) && data.rows[0] ? [`Show the ledger for ${(data.rows[0] as { customerCode: string }).customerCode}`] : []),
+            "Which credit requests are pending?",
+          ]),
           {
             id: "k",
             component: "KpiStrip",
@@ -289,9 +301,9 @@ function plan(q: string): Plan | null {
   if (/top customer|best customer|biggest customer|customers by (revenue|sales)/.test(s)) {
     return {
       tool: "getSalesSummary",
-      args: { groupBy: "customer", from: "2026-01-01", limit: 10 },
+      args: { groupBy: "customer", ...window, limit: 10 },
       layout: (r) => ({
-        say: "Your top customers by revenue this year.",
+        say: "Top customers by revenue over the last three full months.",
         components: [
           panel("Top customers", ["b"], ["Show sales by month", "Which orders are stuck in dispatch?"]),
           { id: "b", component: "BreakdownBar", title: "Revenue by customer", rows: { bind: `${r}.rows` }, labelField: "label", valueField: "revenueCents", format: "money", limit: 10 },
@@ -302,11 +314,11 @@ function plan(q: string): Plan | null {
   if (/sales|revenue|trend|month|how are we doing|performance/.test(s)) {
     return {
       tool: "getSalesSummary",
-      args: { groupBy: "month", from: "2026-01-01" },
+      args: { groupBy: "month", ...window },
       layout: (r, has) => ({
-        say: "Revenue by month since January, with the period before for comparison.",
+        say: "Revenue for the last three full months, compared with the three months before.",
         components: [
-          panel("Sales by month", ["k", has("TrendChart") ? "c" : "t"], ["Who are the top customers?", "Which orders are stuck in dispatch?"]),
+          panel("Sales, last three full months", ["k", has("TrendChart") ? "c" : "t"], ["Who are the top customers?", "Which orders are stuck in dispatch?"]),
           {
             id: "k",
             component: "KpiStrip",
@@ -446,7 +458,8 @@ export class ScriptedModel implements ModelAdapter {
     const tools = new Set(req.tools.map((t) => t.name));
     const actions = system.match(/Actions this user can start:([\s\S]*?)\n\n/)?.[1] ?? "";
     const has = (c: string) => (c.startsWith("@") ? new RegExp(`- ${c.slice(1)}:`).test(actions) : components.has(c));
-    const p = plan(question);
+    const today = system.match(/Today is (\d{4}-\d{2}-\d{2})/)?.[1] ?? new Date().toISOString().slice(0, 10);
+    const p = plan(question, today);
 
     if (!req.final && toolResults.length === 0 && p && tools.has(p.tool)) {
       const call: ToolCall = { id: `call_${randomUUID().slice(0, 8)}`, type: "function", function: { name: p.tool, arguments: JSON.stringify(p.args) } };

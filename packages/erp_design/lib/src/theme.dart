@@ -26,7 +26,10 @@ extension ErpThemeContext on BuildContext {
 ThemeData buildErpTheme(Brightness brightness) {
   final c = brightness == Brightness.light ? ErpColors.light : ErpColors.dark;
   final t = ErpType(c.text, c.textSecondary, c.textMuted);
-  final controlBorder = OutlineInputBorder(borderRadius: Radii.control, borderSide: BorderSide(color: c.borderStrong));
+  final controlBorder = OutlineInputBorder(
+    borderRadius: Radii.control,
+    borderSide: BorderSide(color: c.borderStrong),
+  );
   return ThemeData(
     brightness: brightness,
     useMaterial3: true,
@@ -74,22 +77,30 @@ ThemeData buildErpTheme(Brightness brightness) {
       color: c.surface,
       elevation: 6,
       shadowColor: Colors.black.withValues(alpha: 0.18),
-      shape: RoundedRectangleBorder(borderRadius: Radii.surface, side: BorderSide(color: c.border)),
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.surface,
+        side: BorderSide(color: c.border),
+      ),
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: c.surface,
       elevation: 6,
       shadowColor: Colors.black.withValues(alpha: 0.18),
-      shape: RoundedRectangleBorder(borderRadius: Radii.surface, side: BorderSide(color: c.border)),
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.surface,
+        side: BorderSide(color: c.border),
+      ),
     ),
     tooltipTheme: TooltipThemeData(
       decoration: BoxDecoration(color: c.text, borderRadius: Radii.control),
       textStyle: t.caption.copyWith(color: c.bg),
     ),
-    pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
-      TargetPlatform.macOS: FadeForwardsPageTransitionsBuilder(),
-    }),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.macOS: FadeForwardsPageTransitionsBuilder(),
+      },
+    ),
     extensions: [ErpTheme(c)],
   );
 }

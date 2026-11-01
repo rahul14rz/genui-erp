@@ -15,7 +15,11 @@ void main() {
     group('$name theme', () {
       for (final MapEntry(key: pair, value: (fg, bg)) in colors.textPairs.entries) {
         test('$pair meets WCAG AA for body text', () {
-          expect(contrast(fg, bg), greaterThanOrEqualTo(4.5), reason: '$pair is ${contrast(fg, bg).toStringAsFixed(2)}:1');
+          expect(
+            contrast(fg, bg),
+            greaterThanOrEqualTo(4.5),
+            reason: '$pair is ${contrast(fg, bg).toStringAsFixed(2)}:1',
+          );
         });
       }
     });

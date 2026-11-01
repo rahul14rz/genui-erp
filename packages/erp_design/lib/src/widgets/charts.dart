@@ -30,33 +30,42 @@ class TrendChartView extends StatelessWidget {
     final t = context.type;
     final palette = [c.accent, c.textSecondary];
     return ErpSurface(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (data.title != null) SectionTitle(data.title!),
-        Wrap(spacing: Space.x4, children: [
-          for (var i = 0; i < data.series.length; i++)
-            Row(mainAxisSize: MainAxisSize.min, children: [
-              Container(width: 10, height: 2, color: palette[i]),
-              const SizedBox(width: Space.x1 + 2),
-              Text(data.series[i].label, style: t.caption.copyWith(color: c.textSecondary)),
-            ]),
-        ]),
-        const SizedBox(height: Space.x3),
-        Semantics(
-          label: _describe(),
-          child: SizedBox(
-            height: 220,
-            child: CustomPaint(
-              size: Size.infinite,
-              painter: _TrendPainter(
-                data: data,
-                palette: palette,
-                grid: c.border,
-                label: t.caption.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (data.title != null) SectionTitle(data.title!),
+          Wrap(
+            spacing: Space.x4,
+            children: [
+              for (var i = 0; i < data.series.length; i++)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(width: 10, height: 2, color: palette[i]),
+                    const SizedBox(width: Space.x1 + 2),
+                    Text(data.series[i].label, style: t.caption.copyWith(color: c.textSecondary)),
+                  ],
+                ),
+            ],
+          ),
+          const SizedBox(height: Space.x3),
+          Semantics(
+            label: _describe(),
+            child: SizedBox(
+              height: 220,
+              child: CustomPaint(
+                size: Size.infinite,
+                painter: _TrendPainter(
+                  data: data,
+                  palette: palette,
+                  grid: c.border,
+                  label: t.caption.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+                ),
               ),
             ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 
@@ -75,7 +84,10 @@ class _TrendPainter extends CustomPainter {
   final Color grid;
   final TextStyle label;
 
-  TextPainter _text(String s) => TextPainter(text: TextSpan(text: s, style: label), textDirection: TextDirection.ltr)..layout();
+  TextPainter _text(String s) => TextPainter(
+    text: TextSpan(text: s, style: label),
+    textDirection: TextDirection.ltr,
+  )..layout();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -122,8 +134,11 @@ class _TrendPainter extends CustomPainter {
           final h = values[i] / top * plot.height;
           final x = plot.left + slot * i + (slot - groupWidth) / 2 + barWidth * s;
           canvas.drawRRect(
-            RRect.fromRectAndCorners(Rect.fromLTWH(x, plot.bottom - h, barWidth - 2, h),
-                topLeft: const Radius.circular(2), topRight: const Radius.circular(2)),
+            RRect.fromRectAndCorners(
+              Rect.fromLTWH(x, plot.bottom - h, barWidth - 2, h),
+              topLeft: const Radius.circular(2),
+              topRight: const Radius.circular(2),
+            ),
             Paint()..color = color,
           );
         }
@@ -172,41 +187,51 @@ class BreakdownBarView extends StatelessWidget {
     final shown = rows.take(data.limit ?? 8).toList();
     final max = shown.isEmpty ? 1 : _num(shown.first[data.valueField]).toDouble();
     return ErpSurface(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (data.title != null) SectionTitle(data.title!),
-        for (final r in shown)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: Space.x1 + 2),
-            child: Row(children: [
-              Expanded(
-                flex: 3,
-                child: Text('${r[data.labelField] ?? ''}', style: t.body, overflow: TextOverflow.ellipsis),
-              ),
-              const SizedBox(width: Space.x3),
-              Expanded(
-                flex: 4,
-                child: LayoutBuilder(builder: (context, box) {
-                  final v = _num(r[data.valueField]).toDouble();
-                  return Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      height: 8,
-                      width: max <= 0 ? 0 : box.maxWidth * (v / max).clamp(0, 1),
-                      decoration: BoxDecoration(color: c.accent, borderRadius: Radii.control),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (data.title != null) SectionTitle(data.title!),
+          for (final r in shown)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: Space.x1 + 2),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Text('${r[data.labelField] ?? ''}', style: t.body, overflow: TextOverflow.ellipsis),
+                  ),
+                  const SizedBox(width: Space.x3),
+                  Expanded(
+                    flex: 4,
+                    child: LayoutBuilder(
+                      builder: (context, box) {
+                        final v = _num(r[data.valueField]).toDouble();
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            height: 8,
+                            width: max <= 0 ? 0 : box.maxWidth * (v / max).clamp(0, 1),
+                            decoration: BoxDecoration(color: c.accent, borderRadius: Radii.control),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                }),
+                  ),
+                  const SizedBox(width: Space.x3),
+                  SizedBox(
+                    width: 96,
+                    child: Text(
+                      Fmt.format(data.format, _num(r[data.valueField]), compact: true),
+                      style: t.numeric,
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: Space.x3),
-              SizedBox(
-                width: 96,
-                child: Text(Fmt.format(data.format, _num(r[data.valueField]), compact: true),
-                    style: t.numeric, textAlign: TextAlign.right),
-              ),
-            ]),
-          ),
-        if (shown.isEmpty) Text('Nothing to rank for this period.', style: t.bodySecondary),
-      ]),
+            ),
+          if (shown.isEmpty) Text('Nothing to rank for this period.', style: t.bodySecondary),
+        ],
+      ),
     );
   }
 }
@@ -217,10 +242,13 @@ class ChartSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ErpSurface(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const SkeletonBlock(width: 160, height: 16),
-          const SizedBox(height: Space.x4),
-          SkeletonBlock(height: height),
-        ]),
-      );
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SkeletonBlock(width: 160, height: 16),
+        const SizedBox(height: Space.x4),
+        SkeletonBlock(height: height),
+      ],
+    ),
+  );
 }

@@ -55,10 +55,10 @@ abstract final class Fmt {
   static String status(String raw) => raw.replaceAll('_', ' ');
 
   static String format(Format format, num value, {bool compact = false}) => switch (format) {
-        Format.money => compact ? moneyCompact(value) : money(value),
-        Format.number => grouped(value),
-        Format.percent => percent(value),
-      };
+    Format.money => compact ? moneyCompact(value) : money(value),
+    Format.number => grouped(value),
+    Format.percent => percent(value),
+  };
 
   static String cell(CellType type, Object? value) {
     if (value == null) return '';

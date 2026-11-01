@@ -209,6 +209,10 @@ describe("agent over A2A", () => {
 
     const done = await h.act(token, ctx, "action.confirm", String(confirm.id), "confirm", { idempotencyKey: confirm.idempotencyKey, input: { orderNumber: "SO-99999" } });
     expect(JSON.stringify(updates(done))).toContain("Change saved");
+    // The queue that showed the order is sent again without it.
+    const refreshed = updates(done).find((u) => u.surfaceId === "s1")!;
+    const rows = refreshed.components.find((c) => c.component === "DataTable")!.rows as { orderNumber: string }[];
+    expect(rows.map((r) => r.orderNumber)).not.toContain(row.orderNumber);
     const after = await admin.query("select d.status, d.carrier from dispatches d join sales_orders o on o.id = d.order_id where o.number = $1", [row.orderNumber]);
     expect(after.rows[0]).toEqual({ status: "dispatched", carrier: "Royal Parcel" });
   });

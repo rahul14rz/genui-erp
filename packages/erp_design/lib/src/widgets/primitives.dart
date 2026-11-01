@@ -81,7 +81,12 @@ class StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(color: bg, borderRadius: Radii.control),
-      child: Text(status.replaceAll('_', ' ').toUpperCase(), style: context.type.statusLabel.copyWith(color: fg)),
+      child: Text(
+        status.replaceAll('_', ' ').toUpperCase(),
+        style: context.type.statusLabel.copyWith(color: fg),
+        maxLines: 1,
+        softWrap: false,
+      ),
     );
   }
 }
@@ -155,10 +160,16 @@ class _ErpButtonState extends State<ErpButton> {
                   if (widget.busy)
                     Padding(
                       padding: const EdgeInsets.only(right: Space.x2),
-                      child: SizedBox.square(dimension: 12, child: CircularProgressIndicator(strokeWidth: 1.5, color: fg)),
+                      child: SizedBox.square(
+                        dimension: 12,
+                        child: CircularProgressIndicator(strokeWidth: 1.5, color: fg),
+                      ),
                     )
                   else if (widget.icon != null)
-                    Padding(padding: const EdgeInsets.only(right: Space.x1 + 2), child: Icon(widget.icon, size: 16, color: fg)),
+                    Padding(
+                      padding: const EdgeInsets.only(right: Space.x1 + 2),
+                      child: Icon(widget.icon, size: 16, color: fg),
+                    ),
                   Text(widget.label, style: style),
                 ],
               ),
@@ -181,10 +192,10 @@ class SkeletonBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(color: context.colors.surfaceSunken, borderRadius: radius),
-      );
+    width: width,
+    height: height,
+    decoration: BoxDecoration(color: context.colors.surfaceSunken, borderRadius: radius),
+  );
 }
 
 class SectionTitle extends StatelessWidget {
@@ -192,6 +203,8 @@ class SectionTitle extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) =>
-      Padding(padding: const EdgeInsets.only(bottom: Space.x3), child: Text(text, style: context.type.heading));
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: Space.x3),
+    child: Text(text, style: context.type.heading),
+  );
 }

@@ -48,14 +48,14 @@ String _id() {
 /// Speaks A2A to the server over SSE, keeping the conversation's context id.
 class ErpConnection {
   ErpConnection({required String apiUrl, required String token, http.Client? httpClient})
-      : _client = a2a.A2AClient(
+    : _client = a2a.A2AClient(
+        url: '$apiUrl/a2a',
+        transport: a2a.SseTransport(
           url: '$apiUrl/a2a',
-          transport: a2a.SseTransport(
-            url: '$apiUrl/a2a',
-            client: httpClient,
-            authHeaders: {'Authorization': 'Bearer $token', 'X-A2A-Extensions': a2uiExtension},
-          ),
-        );
+          client: httpClient,
+          authHeaders: {'Authorization': 'Bearer $token', 'X-A2A-Extensions': a2uiExtension},
+        ),
+      );
 
   final a2a.A2AClient _client;
   String? contextId;
@@ -99,7 +99,9 @@ class ErpConnection {
       }
     } on Object {
       ended = true;
-      yield const AnswerText('The connection to the server dropped. Nothing was changed. Check that the server is running, then ask again.');
+      yield const AnswerText(
+        'The connection to the server dropped. Nothing was changed. Check that the server is running, then ask again.',
+      );
       yield const TurnEnded(failed: true);
     }
     if (!ended) yield const TurnEnded(failed: false);

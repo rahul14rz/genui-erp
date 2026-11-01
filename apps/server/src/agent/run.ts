@@ -59,6 +59,17 @@ const LIKELY: Record<string, string[]> = {
   listApprovals: ["ApprovalForm"],
 };
 
+/** Tools whose results go stale when an action runs, so their surfaces are refreshed. */
+const AFFECTS: Record<string, string[]> = {
+  markDispatched: ["getDispatchQueue", "listOrders", "getOrder"],
+  adjustStock: ["getStockLevels"],
+  requestDiscount: ["listApprovals"],
+  createQuote: [],
+  decideApproval: ["listApprovals", "getOrder", "listCustomers", "getCustomer"],
+  adjustPrice: ["getOrder"],
+  recordPayment: ["listInvoices", "getCustomerLedger", "getCustomer"],
+};
+
 export const toolSpecs = (role: Session["scope"]["role"]): ToolSpec[] =>
   toolsFor(role).map((t) => ({
     name: t.name,
@@ -221,6 +232,16 @@ export class Agent {
     emit.a2ui({ version: "v0.9", updateComponents: { surfaceId, components: built.built.components } });
   }
 
+  private async refreshAfter(s: Session, action: string, catalog: RoleCatalog, emit: Emitter) {
+    const tools = new Set(AFFECTS[action] ?? []);
+    const stale = [...s.results.values()].filter((r) => tools.has(r.tool));
+    for (const r of stale) await this.rerun(s, r.id, {}, emit);
+    const staleIds = new Set(stale.map((r) => r.id));
+    for (const [surfaceId, state] of s.surfaces) {
+      if ([...state.bindings.values()].flat().some((id) => staleIds.has(id))) this.resend(s, surfaceId, catalog, emit);
+    }
+  }
+
   private async rerun(s: Session, resultId: string, patch: Record<string, unknown>, emit: Emitter): Promise<boolean> {
     const prev = s.results.get(resultId);
     if (!prev) return false;
@@ -327,6 +348,7 @@ export class Agent {
         try {
           const r = await runAction(this.deps.pool, s.scope, pending.action, pending.input, key, this.deps.now());
           notice = { tone: "success", title: r.preview.title, body: `${r.preview.summary} The change is saved and recorded in the audit log.` };
+          await this.refreshAfter(s, pending.action, catalog, emit);
         } catch (err) {
           notice = {
             tone: "danger",

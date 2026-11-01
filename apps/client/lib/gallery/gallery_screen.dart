@@ -24,21 +24,28 @@ class _GalleryScreenState extends State<GalleryScreen> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: Breakpoints.column),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                Text('Catalog gallery', style: t.display),
-                const SizedBox(height: Space.x3),
-                Wrap(spacing: Space.x2, runSpacing: Space.x2, children: [
-                  ErpButton(label: 'Toggle theme', onPressed: widget.onToggleTheme),
-                  ErpButton(
-                    label: _skeletons ? 'Show data' : 'Show skeletons',
-                    onPressed: () => setState(() => _skeletons = !_skeletons),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Catalog gallery', style: t.display),
+                  const SizedBox(height: Space.x3),
+                  Wrap(
+                    spacing: Space.x2,
+                    runSpacing: Space.x2,
+                    children: [
+                      ErpButton(label: 'Toggle theme', onPressed: widget.onToggleTheme),
+                      ErpButton(
+                        label: _skeletons ? 'Show data' : 'Show skeletons',
+                        onPressed: () => setState(() => _skeletons = !_skeletons),
+                      ),
+                    ],
                   ),
-                ]),
-                const SizedBox(height: Space.x2),
-                Text('Every component the agent can render, with sample data.', style: t.bodySecondary),
-                const SizedBox(height: Space.x8),
-                CatalogGallery(skeletons: _skeletons),
-              ]),
+                  const SizedBox(height: Space.x2),
+                  Text('Every component the agent can render, with sample data.', style: t.bodySecondary),
+                  const SizedBox(height: Space.x8),
+                  CatalogGallery(skeletons: _skeletons),
+                ],
+              ),
             ),
           ),
         ),

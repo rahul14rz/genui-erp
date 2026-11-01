@@ -17,28 +17,24 @@ class PanelView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.type;
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Semantics(header: true, child: Text(data.title, style: t.title)),
-      if (data.subtitle != null) ...[
-        const SizedBox(height: Space.x1),
-        Text(data.subtitle!, style: t.bodySecondary),
-      ],
-      const SizedBox(height: Space.x4),
-      for (var i = 0; i < children.length; i++) ...[
-        if (i > 0) const SizedBox(height: Space.x4),
-        children[i],
-      ],
-      if (data.source?.isNotEmpty ?? false) ...[
-        const SizedBox(height: Space.x3),
-        SourceFooter(data.source!),
-      ],
-      if ((data.followUps?.isNotEmpty ?? false) && onFollowUp != null) ...[
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(header: true, child: Text(data.title, style: t.title)),
+        if (data.subtitle != null) ...[const SizedBox(height: Space.x1), Text(data.subtitle!, style: t.bodySecondary)],
         const SizedBox(height: Space.x4),
-        Wrap(spacing: Space.x2, runSpacing: Space.x2, children: [
-          for (final q in data.followUps!.take(3)) FollowUpChip(q, onTap: () => onFollowUp!(q)),
-        ]),
+        for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: Space.x4), children[i]],
+        if (data.source?.isNotEmpty ?? false) ...[const SizedBox(height: Space.x3), SourceFooter(data.source!)],
+        if ((data.followUps?.isNotEmpty ?? false) && onFollowUp != null) ...[
+          const SizedBox(height: Space.x4),
+          Wrap(
+            spacing: Space.x2,
+            runSpacing: Space.x2,
+            children: [for (final q in data.followUps!.take(3)) FollowUpChip(q, onTap: () => onFollowUp!(q))],
+          ),
+        ],
       ],
-    ]);
+    );
   }
 }
 
@@ -59,12 +55,17 @@ class SourceFooter extends StatelessWidget {
     return Semantics(
       label: 'Source',
       child: Text.rich(
-        TextSpan(children: [
-          TextSpan(text: 'Source  ', style: t.caption.copyWith(fontWeight: FontWeight.w500, color: context.colors.textSecondary)),
-          TextSpan(text: tables),
-          if (filters.isNotEmpty) TextSpan(text: '  ·  $filters'),
-          TextSpan(text: '  ·  as of ${Fmt.dateTime(at)} UTC'),
-        ]),
+        TextSpan(
+          children: [
+            TextSpan(
+              text: 'Source  ',
+              style: t.caption.copyWith(fontWeight: FontWeight.w500, color: context.colors.textSecondary),
+            ),
+            TextSpan(text: tables),
+            if (filters.isNotEmpty) TextSpan(text: '  ·  $filters'),
+            TextSpan(text: '  ·  as of ${Fmt.dateTime(at)} UTC'),
+          ],
+        ),
         style: t.caption,
       ),
     );

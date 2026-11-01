@@ -29,8 +29,8 @@ class GenuiErpApp extends ConsumerWidget {
         '/': (_) => const _Gate(),
         if (_galleryEnabled)
           '/gallery': (context) => GalleryScreen(
-                onToggleTheme: () => ref.read(themeModeProvider.notifier).toggle(Theme.of(context).brightness),
-              ),
+            onToggleTheme: () => ref.read(themeModeProvider.notifier).toggle(Theme.of(context).brightness),
+          ),
       },
     );
   }

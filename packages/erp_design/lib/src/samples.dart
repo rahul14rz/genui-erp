@@ -65,10 +65,38 @@ abstract final class Samples {
       {'key': 'valueCents', 'label': 'Value', 'type': 'money'},
     ],
     'rows': [
-      {'orderNumber': 'SO-11185', 'customer': 'Moor Menswear', 'status': 'packed', 'queuedAt': '2026-06-19T15:00:00Z', 'ageDays': 11, 'valueCents': 1284500},
-      {'orderNumber': 'SO-11227', 'customer': 'Skelton Apparel', 'status': 'picking', 'queuedAt': '2026-06-22T12:00:00Z', 'ageDays': 8, 'valueCents': 96320},
-      {'orderNumber': 'SO-11234', 'customer': 'Calder Workwear', 'status': 'queued', 'queuedAt': '2026-06-24T09:00:00Z', 'ageDays': 6, 'valueCents': 412075},
-      {'orderNumber': 'SO-11240', 'customer': 'Holm Fashion House', 'status': 'packed', 'queuedAt': '2026-06-24T16:00:00Z', 'ageDays': 5, 'valueCents': 2250000},
+      {
+        'orderNumber': 'SO-11185',
+        'customer': 'Moor Menswear',
+        'status': 'packed',
+        'queuedAt': '2026-06-19T15:00:00Z',
+        'ageDays': 11,
+        'valueCents': 1284500,
+      },
+      {
+        'orderNumber': 'SO-11227',
+        'customer': 'Skelton Apparel',
+        'status': 'picking',
+        'queuedAt': '2026-06-22T12:00:00Z',
+        'ageDays': 8,
+        'valueCents': 96320,
+      },
+      {
+        'orderNumber': 'SO-11234',
+        'customer': 'Calder Workwear',
+        'status': 'queued',
+        'queuedAt': '2026-06-24T09:00:00Z',
+        'ageDays': 6,
+        'valueCents': 412075,
+      },
+      {
+        'orderNumber': 'SO-11240',
+        'customer': 'Holm Fashion House',
+        'status': 'packed',
+        'queuedAt': '2026-06-24T16:00:00Z',
+        'ageDays': 5,
+        'valueCents': 2250000,
+      },
     ],
     'total': 14,
     'offset': 0,
@@ -78,7 +106,9 @@ abstract final class Samples {
       {
         'action': 'markDispatched',
         'label': 'Mark dispatched',
-        'input': {'orderNumber': {'field': 'orderNumber'}},
+        'input': {
+          'orderNumber': {'field': 'orderNumber'},
+        },
         'ask': [
           {'key': 'carrier', 'label': 'Carrier', 'kind': 'text'},
         ],
@@ -169,7 +199,13 @@ abstract final class Samples {
     'result': 'r1',
     'filters': [
       {'key': 'range', 'label': 'Ordered', 'kind': 'dateRange', 'value': '2026-06-01..2026-06-30'},
-      {'key': 'status', 'label': 'Status', 'kind': 'select', 'options': ['queued', 'picking', 'packed'], 'value': null},
+      {
+        'key': 'status',
+        'label': 'Status',
+        'kind': 'select',
+        'options': ['queued', 'picking', 'packed'],
+        'value': null,
+      },
       {'key': 'search', 'label': 'Order number', 'kind': 'text', 'value': null},
     ],
   });
@@ -178,8 +214,18 @@ abstract final class Samples {
     for (final (tone, title, body, next) in [
       ('info', 'Showing your customers only', 'Sales figures cover the 20 accounts you own.', null),
       ('success', 'Payment recorded', r'$10.00 was applied to INV-50024.', null),
-      ('warning', 'Two products are out of stock', 'Orders containing them will wait in picking.', 'Ask which purchase orders will restock them.'),
-      ('danger', 'Margins are not available to your role', 'Cost and margin figures are limited to owners.', 'Ask about revenue or order volume instead.'),
+      (
+        'warning',
+        'Two products are out of stock',
+        'Orders containing them will wait in picking.',
+        'Ask which purchase orders will restock them.',
+      ),
+      (
+        'danger',
+        'Margins are not available to your role',
+        'Cost and margin figures are limited to owners.',
+        'Ask about revenue or order volume instead.',
+      ),
     ])
       g.Notice.fromJson({'tone': tone, 'title': title, 'body': body, 'nextStep': next}),
   ];
