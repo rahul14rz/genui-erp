@@ -25,7 +25,7 @@
       "inj-coast-acc",
       "inj-coast-order-note"
     ],
-    "summary": "provider adversarial: 38/45 passed. Schema-valid on first try 97.8%, repaired 0.0%, fell back to text 2.2%. 7s.",
+    "summary": "provider adversarial: 38/45 passed. Schema-valid on first try 97.8%, repaired 0.0%, fell back to text 2.2%. 6s.",
     "ok": true
   },
   {
@@ -33,11 +33,10 @@
     "expect": "suite fails",
     "failedCases": [
       "rep-orders",
-      "rep-approvals",
       "rep-house-order",
       "c-rep-orders"
     ],
-    "summary": "provider scripted: 41/45 passed. Schema-valid on first try 100.0%, repaired 0.0%, fell back to text 0.0%. 6s.",
+    "summary": "provider scripted: 42/45 passed. Schema-valid on first try 100.0%, repaired 0.0%, fell back to text 0.0%. 6s.",
     "ok": true
   }
 ]

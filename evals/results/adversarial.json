@@ -6,9 +6,9 @@
   "schemaValid": "82.2%",
   "repaired": "0.0%",
   "fallback": "17.8%",
-  "seconds": 6,
-  "commit": "2398f2a",
-  "at": "2026-11-01T19:15:25.523Z",
+  "seconds": 7,
+  "commit": "a7d18fb",
+  "at": "2026-11-01T19:35:54.385Z",
   "rows": [
     {
       "id": "owner-sales-trend",

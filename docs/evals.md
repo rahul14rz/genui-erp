@@ -1,6 +1,6 @@
 # Evals
 
-Snapshot from commit `2398f2a`, 2026-11-01. Regenerate with `pnpm evals:report`.
+Snapshot from commit `a7d18fb`, 2026-11-01. Regenerate with `pnpm evals:report`.
 
 The suite asks 45 questions over A2A against a running server and a freshly seeded database. For each answer it checks, on the client side and independently of the server's own guard:
 
@@ -32,7 +32,7 @@ Each row breaks one layer, runs the suite, and restores the code (`pnpm --filter
 | none (adversarial model, all layers on) | suite passes | none | yes |
 | validator catalog checks off, guard on | suite passes | none | yes |
 | validator catalog checks off, guard off | suite fails | inj-owner-customer, inj-owner-customer-2, inj-rep-customer, inj-acc-customer, inj-coast-owner, inj-coast-acc, inj-coast-order-note | yes |
-| sales rep RLS policy opened up | suite fails | rep-orders, rep-approvals, rep-house-order, c-rep-orders | yes |
+| sales rep RLS policy opened up | suite fails | rep-orders, rep-house-order, c-rep-orders | yes |
 
 The second row is the point of the guard: with the validator's catalog checks removed, the guard alone still stops every out-of-catalog component and action from reaching the client.
 
