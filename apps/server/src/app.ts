@@ -1,4 +1,4 @@
-import { lookupLogin, withScope, tenants, type Scope } from "@genui-erp/db";
+import { lookupLogin, userStillValid, withScope, tenants, type Scope } from "@genui-erp/db";
 import { verifyPassword } from "@genui-erp/db/password";
 import Fastify, { type FastifyInstance } from "fastify";
 import type pg from "pg";
@@ -65,7 +65,11 @@ export function buildApp({ config, pool, logger = false, now = () => new Date(),
     const header = req.headers.authorization ?? "";
     const claims = header.startsWith("Bearer ") ? verifyToken(header.slice(7), config.jwtSecret) : null;
     if (!claims) throw new AppError("unauthorized", "Sign in again to continue.");
-    req.scope = scopeOf(claims);
+    // A valid signature is not enough: the user may have been removed or
+    // changed role since the token was issued.
+    const scope = scopeOf(claims);
+    if (!(await userStillValid(pool, scope))) throw new AppError("unauthorized", "Sign in again to continue.");
+    req.scope = scope;
   });
 
   app.get("/health", async () => {

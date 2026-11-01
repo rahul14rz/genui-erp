@@ -24,7 +24,10 @@ export type Session = {
 };
 
 const TTL_MS = 2 * 3600_000;
-const MAX_SESSIONS = 500;
+const MAX_SESSIONS = 5000;
+const MAX_SESSIONS_PER_USER = 20;
+export const MAX_RESULTS_PER_SESSION = 40;
+export const MAX_PENDING_PER_SESSION = 20;
 
 /** In-memory conversation state. A context id only ever belongs to the user who opened it. */
 export class SessionStore {
@@ -45,6 +48,9 @@ export class SessionStore {
       existing.scope.role === scope.role
     ) {
       existing.touched = Date.now();
+      // Re-insert so map order is least recently used first.
+      this.sessions.delete(existing.contextId);
+      this.sessions.set(existing.contextId, existing);
       return existing;
     }
     // An unknown context, or one that belongs to someone else, starts fresh
@@ -60,6 +66,9 @@ export class SessionStore {
       seq: { result: 0, surface: 0 },
       touched: Date.now(),
     };
+    // One user opening many conversations only pushes out their own oldest.
+    const mine = [...this.sessions.values()].filter((x) => x.scope.userId === scope.userId);
+    for (const old of mine.slice(0, Math.max(0, mine.length - MAX_SESSIONS_PER_USER + 1))) this.sessions.delete(old.contextId);
     this.sessions.set(session.contextId, session);
     return session;
   }

@@ -29,7 +29,8 @@ export function createEmitter(write: (parts: Part[]) => void, catalog: RoleCatal
     a2ui(msg) {
       const errors = guardMessage(msg, catalog);
       if (errors.length === 0) return send(msg);
-      log.warn({ role: catalog.role, errors, msg }, "guard_rejected");
+      // Reasons only: the message itself carries tenant data.
+      log.warn({ role: catalog.role, errors }, "guard_rejected");
       const surfaceId = "updateComponents" in msg ? msg.updateComponents.surfaceId : "guard-error";
       const replacement = errorSurface(surfaceId, "This answer was blocked", "Part of the answer referenced something your role cannot see, so it was not shown.", "Try asking the question in a narrower way.");
       for (const m of replacement) if (guardMessage(m, catalog).length === 0) send(m);

@@ -86,3 +86,9 @@ export async function lookupLogin(pool: pg.Pool, email: string): Promise<AuthRec
     passwordHash: row.password_hash,
   };
 }
+
+/** True when the user still exists with this tenant and role. */
+export async function userStillValid(pool: pg.Pool, scope: Scope): Promise<boolean> {
+  const { rows } = await pool.query<{ ok: boolean }>("select auth_check($1, $2, $3) as ok", [scope.userId, scope.tenantId, scope.role]);
+  return rows[0]?.ok === true;
+}

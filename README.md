@@ -62,7 +62,7 @@ You need Node 22 with pnpm, Flutter 3.35.7 or newer, and either Docker or a loca
 
 Sign in with any seeded user. The password for all of them is `genui-erp-local`, for local use only. The users are `owner`, `salesrep`, `warehouse` and `accounts` at `@northfield.test` (Northfield Textiles) and `@coastline.test` (Coastline Hardware), for example `warehouse@northfield.test`. The sign-in screen lists them.
 
-`docker compose up` also builds and starts the server, which migrates and seeds an empty database on first start.
+`JWT_SECRET=$(openssl rand -hex 32) docker compose up` also builds and starts the server, which migrates and seeds an empty database on first start. The server refuses to start in production mode without its own secret.
 
 ## Evals
 
@@ -101,4 +101,5 @@ Other tests: `pnpm test` runs the RLS tests (every table, every tenant and role,
 - Money is formatted as US dollars for both tenants.
 - The seed is deterministic for a given day: data is generated relative to the day you run `pnpm db:reset`.
 - Frame timings were only measured in headless Chromium with a software renderer, where a static page already shows 66 ms frames at p90. They say nothing about a real GPU.
-- There are no refresh tokens or rate limits. Tokens last eight hours.
+- There are no refresh tokens and no rate limit on sign-in. Tokens last eight hours, and every request checks that the user still exists with the same tenant and role.
+- `evals/failures.jsonl` stores raw rejected model output for every tenant in one file. It is ignored by git and meant for local evaluation, not production.

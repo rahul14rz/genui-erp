@@ -251,15 +251,15 @@ function plan(q: string, today: string): Plan | null {
         const rows = (data?.rows as Record<string, unknown>[] | undefined) ?? [];
         const first = rows[0];
         if (first && has("ApprovalForm")) {
-          const payload = (first.payload ?? {}) as Record<string, unknown>;
+          const payload = (first.details ?? {}) as Record<string, unknown>;
           const impact =
             first.kind === "credit_override"
               ? [
-                  { label: "Current limit", value: { bind: `${r}.rows.0.payload.currentLimitCents` }, type: "money" },
-                  { label: "Requested limit", value: { bind: `${r}.rows.0.payload.requestedLimitCents` }, type: "money" },
+                  { label: "Current limit", value: { bind: `${r}.rows.0.details.currentLimitCents` }, type: "money" },
+                  { label: "Requested limit", value: { bind: `${r}.rows.0.details.requestedLimitCents` }, type: "money" },
                 ]
               : "discountPct" in payload
-                ? [{ label: "Discount", value: { bind: `${r}.rows.0.payload.discountPct` }, type: "percent" }]
+                ? [{ label: "Discount", value: { bind: `${r}.rows.0.details.discountPct` }, type: "percent" }]
                 : [];
           return {
             say: `${rows.length} request${rows.length === 1 ? " is" : "s are"} waiting for a decision.`,

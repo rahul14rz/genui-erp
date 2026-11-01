@@ -1,6 +1,7 @@
 import { approvalRequests, customers, products, salesOrderLines, salesOrders, users } from "@genui-erp/db";
 import { and, desc, eq, gte, inArray, lte, ne, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
+import type { Permission } from "../permissions.ts";
 import { daysAgo, defineTool, filtersOf, isoDate, page } from "./types.ts";
 
 const GROUP = ["month", "week", "customer", "category", "product"] as const;
@@ -171,12 +172,19 @@ export const listApprovals = defineTool({
         customer: z.string().nullable(),
         orderNumber: z.string().nullable(),
         reason: z.string(),
-        payload: z.record(z.string(), z.unknown()),
+        details: z.strictObject({
+          discountPct: z.number().optional(),
+          currentLimitCents: z.number().optional(),
+          requestedLimitCents: z.number().optional(),
+          sku: z.string().optional(),
+          fromCents: z.number().optional(),
+          toCents: z.number().optional(),
+        }),
         createdAt: z.string(),
       }),
     ),
   }),
-  async run({ db }, input) {
+  async run({ db, can }, input) {
     const rows = await db
       .select({
         id: approvalRequests.id,
@@ -201,9 +209,11 @@ export const listApprovals = defineTool({
     return {
       data: {
         total: rows[0]?.total ?? 0,
-        rows: rows.map(({ total: _t, ...r }) => ({
+        // The stored payload is never passed through as is: it can hold
+        // credit limits or prices the role has no grant for.
+        rows: rows.map(({ total: _t, payload, ...r }) => ({
           ...r,
-          payload: r.payload as Record<string, unknown>,
+          details: approvalDetails(payload as Record<string, unknown>, can),
           createdAt: r.createdAt.toISOString(),
         })),
       },
@@ -211,3 +221,14 @@ export const listApprovals = defineTool({
     };
   },
 });
+
+function approvalDetails(p: Record<string, unknown>, can: (perm: Permission) => boolean) {
+  const num = (v: unknown) => (typeof v === "number" ? v : undefined);
+  return {
+    ...(num(p.discountPct) !== undefined ? { discountPct: num(p.discountPct) } : {}),
+    ...(can("credit:read") && num(p.currentLimitCents) !== undefined ? { currentLimitCents: num(p.currentLimitCents) } : {}),
+    ...(can("credit:read") && num(p.requestedLimitCents) !== undefined ? { requestedLimitCents: num(p.requestedLimitCents) } : {}),
+    ...(can("prices:read") && num(p.fromCents) !== undefined ? { fromCents: num(p.fromCents) } : {}),
+    ...(can("prices:read") && num(p.toCents) !== undefined ? { toCents: num(p.toCents) } : {}),
+  };
+}

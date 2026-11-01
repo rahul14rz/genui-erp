@@ -20,6 +20,8 @@ import { z } from "zod";
 import { AppError } from "../errors.ts";
 import { defineAction, type Change } from "./types.ts";
 
+// Each prepare locks the row it will change, so two requests for the same
+// row run one after the other and the second sees the first one's result.
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const reason = z.string().trim().min(3).max(500);
 
@@ -33,7 +35,8 @@ export const markDispatched = defineAction({
       .select({ dispatchId: dispatches.id, dispatchStatus: dispatches.status, orderId: salesOrders.id, orderStatus: salesOrders.status })
       .from(dispatches)
       .innerJoin(salesOrders, eq(salesOrders.id, dispatches.orderId))
-      .where(eq(salesOrders.number, input.orderNumber));
+      .where(eq(salesOrders.number, input.orderNumber))
+      .for("update", { of: dispatches });
     if (!row) throw new AppError("not_found", `No dispatch for order ${input.orderNumber} is visible to you.`);
     if (!["queued", "picking", "packed"].includes(row.dispatchStatus)) {
       throw new AppError("invalid", `Order ${input.orderNumber} is already ${row.dispatchStatus}.`);
@@ -83,7 +86,8 @@ export const adjustStock = defineAction({
       .from(stockLevels)
       .innerJoin(products, eq(products.id, stockLevels.productId))
       .innerJoin(warehouses, eq(warehouses.id, stockLevels.warehouseId))
-      .where(and(eq(products.sku, input.sku), eq(warehouses.code, input.warehouseCode)));
+      .where(and(eq(products.sku, input.sku), eq(warehouses.code, input.warehouseCode)))
+      .for("update", { of: stockLevels });
     if (!row) throw new AppError("not_found", `No stock line for ${input.sku} in ${input.warehouseCode}.`);
     const to = row.onHand + input.delta;
     if (to < 0) throw new AppError("invalid", `Only ${row.onHand} on hand, cannot remove ${-input.delta}.`);
@@ -228,7 +232,8 @@ export const decideApproval = defineAction({
         payload: approvalRequests.payload,
       })
       .from(approvalRequests)
-      .where(eq(approvalRequests.id, input.requestId));
+      .where(eq(approvalRequests.id, input.requestId))
+      .for("update");
     if (!req) throw new AppError("not_found", "That request is not visible to you.");
     if (req.status !== "pending") throw new AppError("invalid", `That request is already ${req.status}.`);
     if (req.requestedBy === scope.userId) throw new AppError("invalid", "You cannot decide your own request.");
@@ -330,7 +335,8 @@ export const recordPayment = defineAction({
     const [inv] = await db
       .select({ id: invoices.id, customerId: invoices.customerId, total: invoices.totalCents, paid: invoices.paidCents, status: invoices.status })
       .from(invoices)
-      .where(eq(invoices.number, input.invoiceNumber));
+      .where(eq(invoices.number, input.invoiceNumber))
+      .for("update");
     if (!inv) throw new AppError("not_found", `No invoice ${input.invoiceNumber} is visible to you.`);
     const outstanding = inv.total - inv.paid;
     if (input.amountCents > outstanding) {

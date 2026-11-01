@@ -362,7 +362,8 @@ function generateTenant(rng: Rng, cfg: TenantConfig, anchor: Date, out: Dataset)
       createdAt: addHours(order.orderedAt, 2),
     });
   }
-  for (const c of customers.slice(0, 2)) {
+  // A rep can only file requests for customers they own.
+  for (const c of customers.filter((x) => x.ownerUserId === userIds.sales_rep).slice(0, 2)) {
     out.approvalRequests.push({
       id: rng.uuid(),
       tenantId,
