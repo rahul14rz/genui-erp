@@ -1,0 +1,5 @@
+packages:
+  - db
+  - apps/server
+  - packages/catalog_schema
+  - evals

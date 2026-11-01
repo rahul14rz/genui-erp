@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+*.log
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+coverage/
+evals/failures.jsonl
