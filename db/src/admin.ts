@@ -39,3 +39,21 @@ export async function resetDatabase(opts: {
     await pool.end();
   }
 }
+
+/**
+ * Applies pending migrations and seeds only when the database has no tenants.
+ * Safe to run on every container start.
+ */
+export async function setupDatabase(opts: { adminUrl: string; appPassword: string; anchor: Date }): Promise<"seeded" | "kept"> {
+  const pool = new pg.Pool({ connectionString: opts.adminUrl, max: 4 });
+  try {
+    await migrate(drizzle(pool), { migrationsFolder: MIGRATIONS });
+    await pool.query(`alter role genui_app login password ${pg.escapeLiteral(opts.appPassword)}`);
+    const { rows } = await pool.query("select count(*)::int as n from tenants");
+    if (rows[0].n > 0) return "kept";
+    await seed(pool, opts.anchor);
+    return "seeded";
+  } finally {
+    await pool.end();
+  }
+}

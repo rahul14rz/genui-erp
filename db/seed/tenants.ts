@@ -3,6 +3,9 @@ export type TenantConfig = {
   name: string;
   currency: string;
   emailDomain: string;
+  // Document numbers do not overlap between tenants, so a number seen in one
+  // tenant can be tried in the other and must come back as not found.
+  numbering: { customer: string; order: number; invoice: number; purchase: number; quote: number };
   people: { owner: string; sales_rep: string; warehouse: string; accounts: string };
   cities: readonly string[];
   warehouses: readonly { code: string; name: string; city: string }[];
@@ -31,6 +34,7 @@ export const TENANTS: readonly TenantConfig[] = [
     name: "Northfield Textiles",
     currency: "USD",
     emailDomain: "northfield.test",
+    numbering: { customer: "N", order: 10001, invoice: 50001, purchase: 3001, quote: 7001 },
     people: {
       owner: "Margaret Hale",
       sales_rep: "Tom Ashby",
@@ -107,6 +111,7 @@ export const TENANTS: readonly TenantConfig[] = [
     name: "Coastline Hardware",
     currency: "USD",
     emailDomain: "coastline.test",
+    numbering: { customer: "C", order: 20001, invoice: 70001, purchase: 4001, quote: 8001 },
     people: {
       owner: "Ruth Calloway",
       sales_rep: "Marco Bellini",

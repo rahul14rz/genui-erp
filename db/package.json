@@ -5,13 +5,16 @@
   "exports": {
     ".": "./src/index.ts",
     "./schema": "./src/schema.ts",
-    "./password": "./src/password.ts"
+    "./password": "./src/password.ts",
+    "./admin": "./src/admin.ts",
+    "./seed": "./seed/generate.ts"
   },
   "scripts": {
     "generate": "drizzle-kit generate",
     "reset": "tsx scripts/reset.ts",
     "test": "vitest run",
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p .",
+    "setup": "tsx scripts/setup.ts"
   },
   "dependencies": {
     "drizzle-orm": "0.45.4",

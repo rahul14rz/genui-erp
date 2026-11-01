@@ -11,3 +11,23 @@ services:
       interval: 2s
       timeout: 3s
       retries: 30
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_ADMIN_URL: postgres://postgres:postgres@postgres:5432/genui_erp
+      DATABASE_URL: postgres://genui_app:genui_app_local@postgres:5432/genui_erp
+      GENUI_APP_PASSWORD: genui_app_local
+      JWT_SECRET: ${JWT_SECRET:-genui-erp-compose-secret-for-local-use-only}
+      MODEL_BASE_URL: ${MODEL_BASE_URL:-http://host.docker.internal:11434/v1}
+      MODEL_NAME: ${MODEL_NAME:-qwen2.5:7b-instruct}
+      MODEL_API_KEY: ${MODEL_API_KEY:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8787:8787"

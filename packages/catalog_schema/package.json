@@ -1,0 +1,16 @@
+{
+  "name": "@genui-erp/catalog-schema",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "tsx tool/generate.ts",
+    "check": "tsx tool/generate.ts --check",
+    "test": "tsx tool/generate.ts --check",
+    "typecheck": "tsc -p ."
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  }
+}

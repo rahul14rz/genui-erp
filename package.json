@@ -2,10 +2,15 @@
   "name": "genui-erp",
   "private": true,
   "packageManager": "pnpm@10.28.0",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "db:reset": "pnpm --filter @genui-erp/db reset",
+    "db:reset": "pnpm --filter @genui-erp/db run reset",
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "db:setup": "pnpm --filter @genui-erp/db run setup",
+    "start": "pnpm --filter @genui-erp/server run start",
+    "dev": "pnpm --filter @genui-erp/server run dev"
   }
 }

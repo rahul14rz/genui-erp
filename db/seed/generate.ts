@@ -140,7 +140,7 @@ function generateTenant(rng: Rng, cfg: TenantConfig, anchor: Date, out: Dataset)
     customers.push({
       id: rng.uuid(),
       tenantId,
-      code: `C${String(1001 + n)}`,
+      code: `${cfg.numbering.customer}${String(1001 + n)}`,
       name,
       city: rng.pick(cfg.cities),
       // Half the book belongs to the sales rep, the rest are house accounts.
@@ -154,8 +154,8 @@ function generateTenant(rng: Rng, cfg: TenantConfig, anchor: Date, out: Dataset)
   // A few large accounts carry most of the volume.
   const customerWeights = customers.map((_, i) => (i < 6 ? 8 : i < 16 ? 3 : 1));
 
-  let orderSeq = 10001;
-  let invoiceSeq = 50001;
+  let orderSeq = cfg.numbering.order;
+  let invoiceSeq = cfg.numbering.invoice;
   let paymentSeq = 1;
   const stuckSlots = new Set([5, 6, 8, 11]);
   for (let day = 0; day <= DAYS; day++) {
@@ -283,7 +283,7 @@ function generateTenant(rng: Rng, cfg: TenantConfig, anchor: Date, out: Dataset)
         creditCents: 0,
       });
       if (paid > 0) {
-        const reference = `PAY-${String(paymentSeq++).padStart(5, "0")}`;
+        const reference = `PAY-${cfg.numbering.customer}${String(paymentSeq++).padStart(5, "0")}`;
         out.payments.push({
           id: rng.uuid(),
           tenantId,
@@ -308,7 +308,7 @@ function generateTenant(rng: Rng, cfg: TenantConfig, anchor: Date, out: Dataset)
     }
   }
 
-  let poSeq = 3001;
+  let poSeq = cfg.numbering.purchase;
   for (let i = 0; i < 30; i++) {
     const orderedAt = addDays(start, rng.int(0, DAYS));
     const age = (anchor.getTime() - orderedAt.getTime()) / DAY;
@@ -402,7 +402,7 @@ function generateTenant(rng: Rng, cfg: TenantConfig, anchor: Date, out: Dataset)
     out.quotes.push({
       id: rng.uuid(),
       tenantId,
-      number: `Q-${7001 + i}`,
+      number: `Q-${cfg.numbering.quote + i}`,
       customerId: rng.pick(repCustomers).id,
       createdBy: userIds.sales_rep,
       status: rng.pick(["draft", "sent", "accepted", "expired"] as const),
