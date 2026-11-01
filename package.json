@@ -14,6 +14,7 @@
     "dev": "pnpm --filter @genui-erp/server run dev",
     "generate": "pnpm --filter @genui-erp/catalog-schema run generate",
     "evals": "pnpm --filter @genui-erp/evals run evals",
-    "evals:report": "pnpm --filter @genui-erp/evals run report"
+    "evals:report": "pnpm --filter @genui-erp/evals run report",
+    "lint:prose": "node tools/lint-prose.mjs"
   }
 }
