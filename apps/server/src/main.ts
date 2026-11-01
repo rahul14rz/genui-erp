@@ -1,10 +1,13 @@
 import { createPool } from "@genui-erp/db";
 import { buildApp } from "./app.ts";
 import { loadConfig } from "./config.ts";
+import { modelFromEnv } from "./model/index.ts";
 
 const config = loadConfig();
 const pool = createPool(config.databaseUrl);
-const app = buildApp({ config, pool, logger: true });
+const model = modelFromEnv();
+const app = buildApp({ config, pool, logger: true, model, failureLog: config.failureLog });
+app.log.info(`model: ${model.name}`);
 
 const shutdown = async () => {
   await app.close();

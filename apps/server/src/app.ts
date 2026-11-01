@@ -8,6 +8,9 @@ import { scopeOf, signToken, verifyToken } from "./auth/jwt.ts";
 import type { Config } from "./config.ts";
 import { AppError } from "./errors.ts";
 import { ROLE_PERMISSIONS } from "./generated/permissions.ts";
+import { registerA2a } from "./agent/a2a.ts";
+import { ScriptedModel } from "./model/scripted.ts";
+import type { ModelAdapter } from "./model/types.ts";
 import { runTool, toolsFor } from "./tools/registry.ts";
 
 declare module "fastify" {
@@ -16,7 +19,14 @@ declare module "fastify" {
   }
 }
 
-export type AppDeps = { config: Config; pool: pg.Pool; logger?: boolean; now?: () => Date };
+export type AppDeps = {
+  config: Config;
+  pool: pg.Pool;
+  logger?: boolean;
+  now?: () => Date;
+  model?: ModelAdapter;
+  failureLog?: string;
+};
 
 const PUBLIC_ROUTES = new Set(["/health", "/auth/login", "/.well-known/agent-card.json"]);
 // Run against a fixed hash when the email is unknown, so a miss takes as long
@@ -25,7 +35,7 @@ const DUMMY_HASH = "scrypt$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
 const Login = z.object({ email: z.email(), password: z.string().min(1).max(200) });
 
-export function buildApp({ config, pool, logger = false, now = () => new Date() }: AppDeps): FastifyInstance {
+export function buildApp({ config, pool, logger = false, now = () => new Date(), model = new ScriptedModel(), failureLog }: AppDeps): FastifyInstance {
   const app = Fastify({ logger, bodyLimit: 256 * 1024 });
   app.decorateRequest("scope", null as unknown as Scope);
 
@@ -41,7 +51,16 @@ export function buildApp({ config, pool, logger = false, now = () => new Date() 
     return reply.status(500).send({ error: { code: "internal", message: "Something went wrong on the server." } });
   });
 
+  // The web client is served from another origin in development.
+  app.addHook("onRequest", async (req, reply) => {
+    reply.header("access-control-allow-origin", config.corsOrigin);
+    reply.header("access-control-allow-headers", "authorization, content-type, idempotency-key, x-a2a-extensions");
+    reply.header("access-control-allow-methods", "GET, POST, OPTIONS");
+    if (req.method === "OPTIONS") return reply.status(204).send();
+  });
+
   app.addHook("onRequest", async (req) => {
+    if (req.method === "OPTIONS") return;
     if (PUBLIC_ROUTES.has(req.routeOptions.url ?? "")) return;
     const header = req.headers.authorization ?? "";
     const claims = header.startsWith("Bearer ") ? verifyToken(header.slice(7), config.jwtSecret) : null;
@@ -91,6 +110,8 @@ export function buildApp({ config, pool, logger = false, now = () => new Date() 
     const key = req.headers["idempotency-key"];
     return runAction(pool, req.scope, req.params.name, req.body, Array.isArray(key) ? key[0] : key, now());
   });
+
+  registerA2a(app, { pool, model, now, failureLog, publicUrl: config.publicUrl });
 
   return app;
 }

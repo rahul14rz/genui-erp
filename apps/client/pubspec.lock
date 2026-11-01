@@ -2,7 +2,7 @@
 # See https://dart.dev/tools/pub/glossary#lockfile
 packages:
   a2ui_core:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: a2ui_core
       sha256: "81cd97d82d58719e68856e901b8e8cae45be201ed7b1f9a0c9ba79226dc87208"
@@ -272,7 +272,7 @@ packages:
     source: hosted
     version: "0.15.7"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"
@@ -328,7 +328,7 @@ packages:
     source: hosted
     version: "4.12.0"
   json_schema_builder:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: json_schema_builder
       sha256: "657db3229ba10305c48e8686e8b3aca16e12e639c3a7b96687a6eeb7836b6e1b"
