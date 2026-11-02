@@ -1,0 +1,39 @@
+{
+  "title": "DataTable",
+  "description": "Rows from one tool result with typed columns. Paging and sorting re-run the tool on the server.",
+  "x-permission": null,
+  "type": "object",
+  "properties": {
+    "title": { "type": "string", "maxLength": 80 },
+    "columns": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string", "x-field": true },
+          "label": { "type": "string", "maxLength": 32 },
+          "type": { "$ref": "#/$defs/CellType" },
+          "sortable": { "type": "boolean" }
+        },
+        "required": ["key", "label", "type"],
+        "additionalProperties": false
+      }
+    },
+    "rows": { "type": "array", "items": { "$ref": "#/$defs/Row" }, "x-bindable": true },
+    "total": { "type": "integer", "x-bindable": true },
+    "offset": { "type": "integer", "minimum": 0 },
+    "pageSize": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "sort": {
+      "type": "object",
+      "properties": { "key": { "type": "string" }, "direction": { "enum": ["asc", "desc"] } },
+      "required": ["key", "direction"],
+      "additionalProperties": false
+    },
+    "rowActions": { "type": "array", "maxItems": 2, "items": { "$ref": "#/$defs/ActionRef" } },
+    "emptyText": { "type": "string", "maxLength": 160 }
+  },
+  "required": ["columns", "rows"],
+  "additionalProperties": false
+}

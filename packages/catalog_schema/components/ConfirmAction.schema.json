@@ -1,0 +1,31 @@
+{
+  "title": "ConfirmAction",
+  "description": "The exact changes a write will make, with confirm and cancel. Built by the server from the action preview, never by the model.",
+  "x-permission": "@action",
+  "x-server-only": true,
+  "type": "object",
+  "properties": {
+    "action": { "type": "string", "x-action": true },
+    "input": { "type": "object", "additionalProperties": true },
+    "idempotencyKey": { "type": "string" },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entity": { "type": "string" },
+          "label": { "type": "string" },
+          "field": { "type": "string" },
+          "from": { "type": ["string", "number", "null"] },
+          "to": { "type": ["string", "number", "null"] }
+        },
+        "required": ["entity", "label", "field", "from", "to"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["action", "input", "idempotencyKey", "title", "summary", "changes"],
+  "additionalProperties": false
+}

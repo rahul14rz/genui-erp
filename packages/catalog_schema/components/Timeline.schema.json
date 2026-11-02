@@ -1,0 +1,15 @@
+{
+  "title": "Timeline",
+  "description": "Status history for an order or dispatch, oldest first.",
+  "x-permission": "orders:read",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string", "maxLength": 80 },
+    "rows": { "type": "array", "items": { "$ref": "#/$defs/Row" }, "x-bindable": true },
+    "labelField": { "type": "string", "x-field": true },
+    "atField": { "type": "string", "x-field": true },
+    "noteField": { "type": "string", "x-field": true }
+  },
+  "required": ["rows", "labelField", "atField"],
+  "additionalProperties": false
+}

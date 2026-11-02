@@ -1,0 +1,27 @@
+name: genui_erp_client
+description: Flutter client for genui-erp.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=3.35.7"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  erp_design:
+    path: ../../packages/erp_design
+  a2ui_core: 0.1.1
+  flutter_riverpod: 3.4.3
+  genui: 0.10.4
+  genui_a2a: 0.10.1
+  http: 1.6.0
+  json_schema_builder: 0.1.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

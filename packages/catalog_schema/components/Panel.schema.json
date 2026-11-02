@@ -1,0 +1,15 @@
+{
+  "title": "Panel",
+  "description": "The root of every surface. Holds a title, child components in order, the source footer and up to three follow-up questions.",
+  "x-permission": null,
+  "type": "object",
+  "properties": {
+    "title": { "type": "string", "maxLength": 80 },
+    "subtitle": { "type": "string", "maxLength": 160 },
+    "children": { "type": "array", "items": { "type": "string" }, "minItems": 1, "maxItems": 6, "x-children": true },
+    "source": { "type": "array", "items": { "$ref": "#/$defs/Source" }, "x-server": true },
+    "followUps": { "type": "array", "items": { "type": "string", "maxLength": 80 }, "maxItems": 3 }
+  },
+  "required": ["title", "children"],
+  "additionalProperties": false
+}

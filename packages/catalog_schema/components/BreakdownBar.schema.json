@@ -1,0 +1,16 @@
+{
+  "title": "BreakdownBar",
+  "description": "Horizontal bars ranked by value, such as top customers or top SKUs.",
+  "x-permission": null,
+  "type": "object",
+  "properties": {
+    "title": { "type": "string", "maxLength": 80 },
+    "rows": { "type": "array", "items": { "$ref": "#/$defs/Row" }, "x-bindable": true },
+    "labelField": { "type": "string", "x-field": true },
+    "valueField": { "type": "string", "x-field": true },
+    "format": { "$ref": "#/$defs/Format" },
+    "limit": { "type": "integer", "minimum": 3, "maximum": 12 }
+  },
+  "required": ["rows", "labelField", "valueField", "format"],
+  "additionalProperties": false
+}

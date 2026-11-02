@@ -1,0 +1,37 @@
+{
+  "title": "RecordCard",
+  "description": "One entity with its key fields and links to related questions.",
+  "x-permission": null,
+  "type": "object",
+  "properties": {
+    "title": { "type": "string", "maxLength": 80, "x-bindable": true },
+    "subtitle": { "type": "string", "maxLength": 120, "x-bindable": true },
+    "status": { "type": "string", "x-bindable": true },
+    "fields": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "maxLength": 32 },
+          "value": { "type": ["string", "number", "null"], "x-bindable": true },
+          "type": { "$ref": "#/$defs/CellType" }
+        },
+        "required": ["label", "value", "type"],
+        "additionalProperties": false
+      }
+    },
+    "links": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "properties": { "label": { "type": "string", "maxLength": 40 }, "question": { "type": "string", "maxLength": 120 } },
+        "required": ["label", "question"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["title", "fields"],
+  "additionalProperties": false
+}

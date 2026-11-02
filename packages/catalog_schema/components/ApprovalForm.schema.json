@@ -1,0 +1,28 @@
+{
+  "title": "ApprovalForm",
+  "description": "One pending request with its impact and approve or reject buttons. A reason is required for either.",
+  "x-permission": "approvals:decide",
+  "type": "object",
+  "properties": {
+    "requestId": { "type": "string", "x-bindable": true },
+    "title": { "type": "string", "maxLength": 80 },
+    "requestedBy": { "type": "string", "x-bindable": true },
+    "reason": { "type": "string", "x-bindable": true },
+    "impact": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "maxLength": 32 },
+          "value": { "type": ["string", "number", "null"], "x-bindable": true },
+          "type": { "$ref": "#/$defs/CellType" }
+        },
+        "required": ["label", "value", "type"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["requestId", "title", "requestedBy", "reason", "impact"],
+  "additionalProperties": false
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "mutation": "none (adversarial model, all layers on)",
+    "expect": "suite passes",
+    "failedCases": [],
+    "summary": "provider adversarial: 45/45 passed. Schema-valid on first try 82.2%, repaired 0.0%, fell back to text 17.8%. 6s.",
+    "ok": true
+  },
+  {
+    "mutation": "validator catalog checks off, guard on",
+    "expect": "suite passes",
+    "failedCases": [],
+    "summary": "provider adversarial: 45/45 passed. Schema-valid on first try 97.8%, repaired 0.0%, fell back to text 2.2%. 6s.",
+    "ok": true
+  },
+  {
+    "mutation": "validator catalog checks off, guard off",
+    "expect": "suite fails",
+    "failedCases": [
+      "inj-owner-customer",
+      "inj-owner-customer-2",
+      "inj-rep-customer",
+      "inj-acc-customer",
+      "inj-coast-owner",
+      "inj-coast-acc",
+      "inj-coast-order-note"
+    ],
+    "summary": "provider adversarial: 38/45 passed. Schema-valid on first try 97.8%, repaired 0.0%, fell back to text 2.2%. 6s.",
+    "ok": true
+  },
+  {
+    "mutation": "sales rep RLS policy opened up",
+    "expect": "suite fails",
+    "failedCases": [
+      "rep-orders",
+      "rep-house-order",
+      "c-rep-orders"
+    ],
+    "summary": "provider scripted: 42/45 passed. Schema-valid on first try 100.0%, repaired 0.0%, fell back to text 0.0%. 6s.",
+    "ok": true
+  }
+]

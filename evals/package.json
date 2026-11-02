@@ -1,0 +1,24 @@
+{
+  "name": "@genui-erp/evals",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "evals": "tsx run.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p .",
+    "mutations": "tsx mutations.ts",
+    "report": "tsx run.ts --write=evals/results/scripted.json && tsx run.ts --provider=adversarial --write=evals/results/adversarial.json && tsx mutations.ts && tsx report.ts"
+  },
+  "dependencies": {
+    "@genui-erp/db": "workspace:*",
+    "@genui-erp/server": "workspace:*",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "@types/pg": "8.23.1",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "$comment": "Shared definitions. A property marked x-bindable may hold a literal value or a binding such as {\"bind\": \"r1.rows\"}, which the server replaces with data from a tool result before the message is sent.",
+  "$defs": {
+    "CellType": { "enum": ["text", "mono", "money", "number", "percent", "date", "datetime", "status"] },
+    "Format": { "enum": ["money", "number", "percent"] },
+    "Tone": { "enum": ["info", "success", "warning", "danger"] },
+    "Row": { "type": "object", "additionalProperties": true },
+    "Source": {
+      "type": "object",
+      "properties": {
+        "tables": { "type": "array", "items": { "type": "string" } },
+        "filters": { "type": "object", "additionalProperties": { "type": "string" } },
+        "at": { "type": "string" }
+      },
+      "required": ["tables", "filters", "at"],
+      "additionalProperties": false
+    },
+    "ActionRef": {
+      "type": "object",
+      "description": "Starts a server action. The server re-checks the permission and shows a confirm step before anything is written.",
+      "properties": {
+        "action": { "type": "string", "x-action": true },
+        "label": { "type": "string", "maxLength": 40 },
+        "input": {
+          "type": "object",
+          "description": "Fixed input values. In a table row action, a value of {\"field\": \"orderNumber\"} is read from the row.",
+          "additionalProperties": true
+        },
+        "ask": {
+          "type": "array",
+          "description": "Inputs the user fills in before the confirm step.",
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": { "type": "string" },
+              "label": { "type": "string" },
+              "kind": { "enum": ["text", "number", "money"] }
+            },
+            "required": ["key", "label", "kind"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["action", "label", "input"],
+      "additionalProperties": false
+    }
+  }
+}

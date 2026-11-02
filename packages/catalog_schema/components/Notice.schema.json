@@ -1,0 +1,14 @@
+{
+  "title": "Notice",
+  "description": "A short message with a tone and a next step. Use for refusals, empty results and errors.",
+  "x-permission": null,
+  "type": "object",
+  "properties": {
+    "tone": { "$ref": "#/$defs/Tone" },
+    "title": { "type": "string", "maxLength": 80 },
+    "body": { "type": "string", "maxLength": 400 },
+    "nextStep": { "type": "string", "maxLength": 160 }
+  },
+  "required": ["tone", "title", "body"],
+  "additionalProperties": false
+}
